@@ -1,0 +1,82 @@
+.grid {
+  display: grid;
+  grid-template-columns: 170px repeat(var(--pkg-count), 1fr);
+  flex: 1;
+  min-width: 0;
+}
+
+/* Empty placeholder cell in header row */
+.labelCell {
+  background: var(--surface-2);
+  border-right: 1px solid var(--border-light);
+}
+
+.sectionHeader {
+  grid-column: 1 / -1;
+  padding: 0.4rem 1.25rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-3);
+  background: var(--surface-2);
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+}
+
+/* ── Package header cell ─────────────────────────────────── */
+.packageHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border-right: 1px solid var(--border-light);
+  border-top: 3px solid var(--pkg-color, var(--c0));
+}
+
+.packageNameInput {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  color: var(--text-1);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0;
+  letter-spacing: 0.01em;
+}
+
+.packageNameInput:focus {
+  outline: none;
+  color: var(--text-1);
+}
+
+.packageNameInput::placeholder { color: var(--text-3); }
+
+.removeButton {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.2rem 0.3rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.removeButton:hover {
+  color: var(--negative);
+  background: rgba(197,48,48,.08);
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; }
+  .sectionHeader { grid-column: 1; }
+  .labelCell { display: none; }
+}

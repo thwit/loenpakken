@@ -1,0 +1,160 @@
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem 1.25rem 0.75rem;
+  margin-top: 0.75rem;
+  width: fit-content;
+  min-width: 320px;
+}
+
+/* ── Top bar ── */
+.topBar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.sliderGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sliderLabel {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.68rem;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 120px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--c0);
+  cursor: pointer;
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--c0);
+  transition: box-shadow 0.12s;
+}
+
+.slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--c0);
+  cursor: pointer;
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--c0);
+}
+
+.slider:hover::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+}
+
+.sliderValue {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text-2);
+  min-width: 2.8rem;
+  text-align: right;
+}
+
+/* ── Table ── */
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: auto;
+  border-collapse: collapse;
+  font-size: 0.76rem;
+}
+
+.thYear {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+  text-align: left;
+  padding: 0 1.25rem 0.5rem 0;
+  width: 4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.thPkg {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-2);
+  text-align: right;
+  padding: 0 0 0.5rem 2rem;
+  border-bottom: 1px solid var(--border);
+  border-top: 3px solid transparent;
+  white-space: nowrap;
+}
+
+.tdYear {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--text-3);
+  padding: 0.28rem 1.25rem 0.28rem 0;
+  border-bottom: 1px solid var(--border-light);
+  white-space: nowrap;
+}
+
+.tdVal {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.76rem;
+  color: var(--text-1);
+  text-align: right;
+  padding: 0.28rem 0 0.28rem 2rem;
+  border-bottom: 1px solid var(--border-light);
+  white-space: nowrap;
+}
+
+.rowEven {
+  background: transparent;
+}
+
+.rowOdd {
+  background: var(--surface-2);
+}
+
+.rowOdd .tdYear,
+.rowOdd .tdVal {
+  border-bottom-color: transparent;
+}
+
+tr:last-child .tdYear,
+tr:last-child .tdVal {
+  border-bottom: none;
+}

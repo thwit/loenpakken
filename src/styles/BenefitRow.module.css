@@ -1,0 +1,96 @@
+.labelCell {
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border-light);
+  border-right: 1px solid var(--border-light);
+}
+
+.label {
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.benefitCell {
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid var(--border-light);
+  border-right: 1px solid var(--border-light);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+/* ── Toggle pill ──────────────────────────────────────────── */
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.toggle input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 28px;
+  height: 16px;
+  background: var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.22s;
+}
+
+.toggle input[type="checkbox"]::before {
+  content: '';
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #fff;
+  top: 2.5px;
+  left: 2.5px;
+  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 1px 3px rgba(0,0,0,.18);
+}
+
+.toggle input[type="checkbox"]:checked {
+  background: var(--c0);
+}
+
+.toggle input[type="checkbox"]:checked::before {
+  transform: translateX(12px);
+}
+
+.toggleLabel {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+/* ── Value input (visible when enabled) ─────────────────── */
+.valueInput {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.35rem 0.55rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--text-1);
+  background: var(--surface-2);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.valueInput:focus {
+  outline: none;
+  border-color: var(--c0);
+  box-shadow: 0 0 0 3px rgba(15,118,110,.1);
+}
+
+.valueInput::placeholder { color: var(--text-3); }
