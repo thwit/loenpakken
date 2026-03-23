@@ -1,27 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
 :root {
-  --bg:            #E8ECF1;
+  --bg:            #FFFFFF;
   --surface:       #FFFFFF;
-  --surface-2:     #F4F6F9;
-  --border:        #C8D0DC;
-  --border-light:  #DDE3EB;
+  --surface-2:     #F5F7F8;
+  --border:        #CBD5DC;
+  --border-light:  #E4EAED;
 
-  --text-1:        #111827;
-  --text-2:        #374151;
-  --text-3:        #9CA3AF;
+  --text-1:        #263238;
+  --text-2:        #37474F;
+  --text-3:        #90A4AE;
 
-  /* Package accent palette */
-  --c0: #0F766E;
-  --c1: #C05621;
-  --c2: #1D4ED8;
-  --c3: #6B46C1;
+  --brand:         #546E7A;
+
+  --card-light-bg: #ECEFF1;
+  --card-dark-bg:  #263238;
 
   --positive:      #166534;
   --negative:      #B91C1C;
 
   --shadow:        0 0 0 1px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.07);
-  --radius:        5px;
+  --radius:        6px;
 }
 
 *, *::before, *::after { box-sizing: border-box; }

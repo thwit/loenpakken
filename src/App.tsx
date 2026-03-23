@@ -1,28 +1,22 @@
-import { useReducer, useEffect } from 'react';
+import { useReducer, useEffect, useState } from 'react';
 import type { Package } from './types';
-import { createDefaultPackage, PKG_COLORS } from './constants';
+import { createDefaultPackage } from './constants';
 import { encodeState, decodeState } from './urlState';
 import { calculate, normalizeBreakdowns } from './calculations';
 import { ComparisonGrid } from './components/ComparisonGrid';
-import { ResultsPanel } from './components/ResultsPanel';
-import { GrowthChart } from './components/GrowthChart';
+import { ResultsPanel, type Tab } from './components/ResultsPanel';
 import { ShareButton } from './components/ShareButton';
 import styles from './App.module.css';
 
 type Action =
-  | { type: 'ADD_PACKAGE' }
-  | { type: 'REMOVE_PACKAGE'; id: string }
   | { type: 'UPDATE_FIELD'; id: string; field: keyof Package; value: unknown }
-  | { type: 'UPDATE_BENEFIT'; id: string; benefit: 'healthInsurance' | 'freeFood' | 'phoneComputerCar'; key: 'enabled' | 'valuePerMonth'; value: unknown }
+  | { type: 'ADD_BENEFIT'; id: string }
+  | { type: 'UPDATE_BENEFIT'; id: string; benefitId: string; key: 'label' | 'valuePerMonth'; value: unknown }
+  | { type: 'REMOVE_BENEFIT'; id: string; benefitId: string }
   | { type: 'LOAD_STATE'; packages: Package[] };
 
 function reducer(state: Package[], action: Action): Package[] {
   switch (action.type) {
-    case 'ADD_PACKAGE':
-      if (state.length >= 2) return state;
-      return [...state, createDefaultPackage(`Pakke ${state.length + 1}`)];
-    case 'REMOVE_PACKAGE':
-      return state.filter(p => p.id !== action.id);
     case 'UPDATE_FIELD':
       return state.map(p => {
         if (p.id !== action.id) return p;
@@ -32,13 +26,25 @@ function reducer(state: Package[], action: Action): Package[] {
         }
         return { ...p, [action.field]: value };
       });
+    case 'ADD_BENEFIT':
+      return state.map(p => {
+        if (p.id !== action.id) return p;
+        return { ...p, benefits: [...p.benefits, { id: crypto.randomUUID(), label: '', valuePerMonth: 0 }] };
+      });
     case 'UPDATE_BENEFIT':
       return state.map(p => {
         if (p.id !== action.id) return p;
         return {
           ...p,
-          [action.benefit]: { ...p[action.benefit], [action.key]: action.value },
+          benefits: p.benefits.map(b =>
+            b.id === action.benefitId ? { ...b, [action.key]: action.value } : b
+          ),
         };
+      });
+    case 'REMOVE_BENEFIT':
+      return state.map(p => {
+        if (p.id !== action.id) return p;
+        return { ...p, benefits: p.benefits.filter(b => b.id !== action.benefitId) };
       });
     case 'LOAD_STATE':
       return action.packages;
@@ -48,18 +54,22 @@ function reducer(state: Package[], action: Action): Package[] {
 }
 
 const defaultState: Package[] = [
-  createDefaultPackage('Pakke 1'),
+  createDefaultPackage('Tilbud A'),
+  createDefaultPackage('Tilbud B'),
 ];
 
 export default function App() {
   const [packages, dispatch] = useReducer(reducer, defaultState, () => {
     const decoded = decodeState();
-    return decoded ?? defaultState;
+    if (decoded && decoded.length === 2) return decoded;
+    return defaultState;
   });
 
   useEffect(() => {
     encodeState(packages);
   }, [packages]);
+
+  const [tab, setTab] = useState<Tab>('timesats');
 
   const rawResults = packages.map(pkg => calculate(pkg));
   const normalizedBreakdowns = normalizeBreakdowns(rawResults);
@@ -69,49 +79,26 @@ export default function App() {
     <div className={styles.app}>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <div className={styles.headerBrand}>
-            <div className={styles.logo}>
-              <span className={styles.logoDot} />
-              Lønpakken
-            </div>
-            <p className={styles.tagline}>Sammenlign jobtilbud og forstå din reelle løn</p>
-          </div>
+          <span className={styles.logo}>Lønpakken</span>
           <ShareButton />
         </div>
       </header>
       <main className={styles.main}>
-        <div className={styles.contentWrapper}>
-          <div className={styles.tableCard}>
-            <ComparisonGrid packages={packages} dispatch={dispatch} />
-            {packages.length < 2 && (
-              <button
-                className={styles.addPackageButton}
-                onClick={() => dispatch({ type: 'ADD_PACKAGE' })}
-              >
-                <span className={styles.addPackageIcon}>+</span>
-                <span>Tilføj pakke</span>
-              </button>
-            )}
-          </div>
-          <div
-            className={styles.resultsRow}
-            style={{
-              '--pkg-count': packages.length,
-              '--add-col': packages.length < 2 ? '100px' : '0px',
-            } as React.CSSProperties}
-          >
-            <div className={styles.resultsSpacer} />
+        <ComparisonGrid packages={packages} dispatch={dispatch} />
+        <section className={styles.resultsSection}>
+          <h2 className={styles.resultsHeading}>Analyse af Resultat</h2>
+          <div className={styles.resultsCards}>
             {packages.map((pkg, i) => (
-              <ResultsPanel key={pkg.id} result={results[i]} color={PKG_COLORS[i % PKG_COLORS.length]} />
+              <ResultsPanel
+                key={pkg.id}
+                result={results[i]}
+                variant={i === 1 ? 'dark' : 'light'}
+                tab={tab}
+                onTabChange={setTab}
+              />
             ))}
-            {packages.length < 2 && <div className={styles.resultsAddSpacer} />}
           </div>
-          <GrowthChart
-            results={results}
-            colors={packages.map((_, i) => PKG_COLORS[i % PKG_COLORS.length])}
-            packageNames={packages.map(p => p.name)}
-          />
-        </div>
+        </section>
       </main>
     </div>
   );

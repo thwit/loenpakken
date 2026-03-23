@@ -2,140 +2,77 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--bg);
 }
 
 .header {
   display: flex;
   justify-content: center;
-  padding: 1.5rem 2rem 0;
 }
 
 .headerInner {
-  width: 48%;
-  background: var(--surface);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  box-shadow: 0 1px 4px rgba(0,0,0,.04);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1.5rem;
-}
-
-.headerBrand {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
+  padding: 1.5rem 2.5rem;
+  max-width: 1200px;
+  width: 100%;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .logo {
   font-family: 'DM Serif Display', serif;
-  font-size: 1.15rem;
-  color: var(--text-2);
+  font-size: 1.5rem;
+  color: var(--brand);
   letter-spacing: -0.01em;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  white-space: nowrap;
   line-height: 1;
-}
-
-.logoDot {
-  width: 7px;
-  height: 7px;
-  background: var(--c0);
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-top: 1px;
-  opacity: 0.7;
-}
-
-.tagline {
-  margin: 0;
-  font-size: 0.76rem;
-  font-weight: 400;
-  color: var(--text-3);
-  letter-spacing: 0.01em;
-  padding-left: calc(9px + 0.5rem); /* indent to align under logo text, past the dot */
 }
 
 .main {
   flex: 1;
-  padding: 2.5rem 2rem 3rem;
-  overflow-x: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  padding: 2.5rem 2.5rem 4rem;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
 }
 
-.contentWrapper {
-  width: 48%;
-  display: flex;
-  flex-direction: column;
+.resultsSection {
+  margin-top: 4rem;
 }
 
-.tableCard {
-  background: var(--surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-  border: 1px solid var(--border-light);
+.resultsHeading {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-1);
+  text-align: center;
+  margin: 0 0 2rem;
+}
+
+.resultsCards {
   display: flex;
+  gap: 1.5rem;
 }
 
 .addPackageButton {
-  width: 100px;
-  flex-shrink: 0;
-  border: none;
-  border-left: 1px dashed var(--border);
-  background: var(--surface-2);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
+  margin-top: 1.5rem;
+  padding: 0.6rem 1.25rem;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  background: transparent;
   color: var(--text-3);
-  cursor: pointer;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   font-weight: 500;
+  cursor: pointer;
   transition: all 0.18s;
-  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .addPackageButton:hover {
-  background: rgba(15,118,110,.04);
-  color: var(--c0);
-  border-color: var(--c0);
-}
-
-.addPackageIcon {
-  font-size: 1.4rem;
-  font-weight: 300;
-  line-height: 1;
-  color: var(--text-3);
-  transition: color 0.18s;
-}
-
-.addPackageButton:hover .addPackageIcon {
-  color: var(--c0);
-}
-
-/* Mirror the grid's column layout so results cards sit directly under their package column.
-   170px matches the label column; +1px accounts for the tableCard's left border.
-   100px matches the add button column width. */
-.resultsRow {
-  display: grid;
-  grid-template-columns: calc(170px + 1px) repeat(var(--pkg-count), 1fr) var(--add-col, 0px);
-  gap: 0 1rem;
-  margin-top: 1rem;
-  padding-right: 1px;
-}
-
-.resultsSpacer {
-  /* empty cell aligned with label column */
-}
-
-.resultsAddSpacer {
-  /* empty cell aligned with add button column */
+  border-color: var(--brand);
+  color: var(--brand);
+  background: rgba(84,110,122,.06);
 }

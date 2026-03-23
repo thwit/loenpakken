@@ -1,65 +1,165 @@
-import type { CSSProperties } from 'react';
 import type { CalculationResult } from '../types';
-import { formatDKK } from '../calculations';
+import { WEEKS_PER_YEAR } from '../constants';
 import styles from '../styles/ResultsPanel.module.css';
+
+export type Tab = 'timesats' | 'månedligt' | 'årligt';
 
 interface Props {
   result: CalculationResult;
-  color: string;
+  variant: 'light' | 'dark';
+  tab: Tab;
+  onTabChange: (tab: Tab) => void;
 }
 
-export function ResultsPanel({ result, color }: Props) {
+export function ResultsPanel({ result, variant, tab, onTabChange }: Props) {
+  const isDark = variant === 'dark';
+  const panelClass = `${styles.panel} ${isDark ? styles.panelDark : styles.panelLight}`;
 
+  const hasLunch = result.lunchHourlyImpact !== 0; // true when betaltFrokost=true
+  const hasCommute = result.commuteHourlyImpact !== 0;
+
+  function fmtRate(n: number) {
+    return `${Math.round(Math.abs(n)).toLocaleString('da-DK')} kr/t`;
+  }
   return (
-    <div
-      className={styles.panel}
-      style={{ '--pkg-color': color } as CSSProperties}
-    >
-      <div className={styles.headline}>
-        <div className={styles.headlineLabel}>Månedlig / Årlig kompensation</div>
-        <div className={styles.headlineValue}>
-          {formatDKK(result.totalAnnualComp / 12)}
-          <span className={styles.headlineSep}> / </span>
-          {formatDKK(result.totalAnnualComp)}
+    <div className={panelClass}>
+      {/* HEADER: main focus + stacked secondary */}
+      <div className={styles.headerCols}>
+        <div className={styles.headerColMain}>
+          <div className={styles.headerLabel}>Effektiv timesats</div>
+          <div className={styles.headerValue}>
+            {Math.round(result.effectiveHourlyRateIncCommute).toLocaleString('da-DK')}
+            <span className={styles.headerUnit}>kr/t</span>
+          </div>
+        </div>
+        <div className={styles.headerColStack}>
+          <div className={styles.headerColSub}>
+            <div className={styles.headerLabelSub}>Timesats</div>
+            <div className={styles.headerValueSub}>
+              {Math.round(result.contractualHourlyRate).toLocaleString('da-DK')}
+              <span className={styles.headerUnitSub}>kr/t</span>
+            </div>
+          </div>
+          <div className={styles.headerColSub}>
+            <div className={styles.headerLabelSub}>Månedligt total</div>
+            <div className={styles.headerValueSub}>
+              {Math.round(result.totalAnnualComp / 12).toLocaleString('da-DK')}
+              <span className={styles.headerUnitSub}>kr/md.</span>
+            </div>
+          </div>
+          <div className={styles.headerColSub}>
+            <div className={styles.headerLabelSub}>Årligt total</div>
+            <div className={styles.headerValueSub}>
+              {Math.round(result.totalAnnualComp).toLocaleString('da-DK')}
+              <span className={styles.headerUnitSub}>kr/år</span>
+            </div>
+          </div>
         </div>
       </div>
-      <div className={styles.metrics}>
-        <div className={styles.metric}>
-          <span className={styles.metricLabel}>Timeløn eksl. pendling</span>
-          <span className={styles.metricValue}>{formatDKK(result.effectiveHourlyRateExCommute)}/t</span>
+
+      {/* TABBED BREAKDOWN */}
+      <div className={styles.tabbedSection}>
+        <div className={styles.tabs}>
+          {(['timesats', 'månedligt', 'årligt'] as Tab[]).map(t => (
+            <button
+              key={t}
+              className={`${styles.tab} ${tab === t ? styles.tabActive : ''}`}
+              onClick={() => onTabChange(t)}
+            >
+              {t.charAt(0).toUpperCase() + t.slice(1)}
+            </button>
+          ))}
         </div>
-        <div className={styles.metric}>
-          <span className={styles.metricLabel}>Timeløn inkl. pendling</span>
-          <span className={styles.metricValue}>{formatDKK(result.effectiveHourlyRateIncCommute)}/t</span>
-        </div>
-        <div className={styles.metric}>
-          <span className={styles.metricLabel}>Estimeret nettoudbetaling/mdr</span>
-          <span className={styles.metricValue}>{formatDKK(result.estimatedMonthlyTakeHome)}</span>
-        </div>
-      </div>
-      <div className={styles.breakdown}>
-        <div className={styles.breakdownHeader}>
-          <span className={styles.breakdownTitle}>Fordeling</span>
-          <span className={styles.breakdownColLabel}>Månedlig</span>
-          <span className={styles.breakdownColLabel}>Årlig</span>
-        </div>
-        {result.breakdown.length === 0 ? (
-          <div className={styles.emptyState}>Udfyld felterne ovenfor</div>
-        ) : (
-          result.breakdown.map((item, i) => {
-            const cls = item.monthlyDKK < 0 ? styles.negative : styles.positive;
-            const sign = item.monthlyDKK < 0 ? '−' : '+';
-            const monthly = formatDKK(Math.abs(item.monthlyDKK));
-            const yearly = formatDKK(Math.abs(item.monthlyDKK * 12));
-            return (
-              <div key={i} className={styles.breakdownItem}>
-                <span className={styles.breakdownLabel}>{item.label}</span>
-                <span className={cls}>{sign}&thinsp;{monthly}</span>
-                <span className={cls}>{sign}&thinsp;{yearly}</span>
+
+        <div className={styles.tabContent}>
+          {tab === 'timesats' ? (
+            /* ── Hourly rate waterfall ── */
+            <>
+              <div className={styles.wfRow}>
+                <span className={styles.wfLabel}>Timesats</span>
+                <span className={styles.wfBase}>{fmtRate(result.baseHourlyRate)}</span>
               </div>
-            );
-          })
-        )}
+              {hasLunch && (
+                <div className={styles.wfRow}>
+                  <span className={styles.wfLabel}>Betalt frokostpause</span>
+                  <span className={styles.wfPos}>+{fmtRate(result.lunchHourlyImpact)}</span>
+                </div>
+              )}
+              {hasCommute && (
+                <div className={styles.wfRow}>
+                  <span className={styles.wfLabel}>Pendlingstid</span>
+                  <span className={styles.wfNeg}>−{fmtRate(result.commuteHourlyImpact)}</span>
+                </div>
+              )}
+              {(hasLunch || hasCommute) && (
+                <div className={`${styles.wfRow} ${styles.wfTotalRow}`}>
+                  <span className={styles.wfLabel}>Effektiv timesats</span>
+                  <span className={styles.wfTotal}>{fmtRate(result.effectiveHourlyRateIncCommute)}</span>
+                </div>
+              )}
+            </>
+          ) : (
+            /* ── Time impact (månedligt / årligt) ── */
+            (() => {
+              const isMonthly = tab === 'månedligt';
+              const HOURS_PER_DAY = 7.4;
+
+              // Annual hours for each factor
+              const lunchHoursPerYear = 2.5 * WEEKS_PER_YEAR;
+              const commuteHoursAnnual = result.commuteHoursPerYear;
+              const vacationHoursPerYear = result.extraVacationDays * HOURS_PER_DAY;
+
+              const fmt = (annualHours: number) => {
+                if (isMonthly) {
+                  const val = Math.round((annualHours / 12) * 10) / 10;
+                  return `${val.toLocaleString('da-DK')} t/md.`;
+                } else {
+                  const val = Math.round((annualHours / HOURS_PER_DAY) * 10) / 10;
+                  return `${val.toLocaleString('da-DK')} arb. dage/år`;
+                }
+              };
+
+              const hasVacation = result.extraVacationDays > 0;
+              const hasAnyRow = hasLunch || hasCommute || hasVacation;
+
+              const totalHours =
+                (hasLunch ? lunchHoursPerYear : 0) +
+                (hasVacation ? vacationHoursPerYear : 0) -
+                (hasCommute ? commuteHoursAnnual : 0);
+
+              return hasAnyRow ? (
+                <>
+                  {hasLunch && (
+                    <div className={styles.wfRow}>
+                      <span className={styles.wfLabel}>Betalt frokostpause</span>
+                      <span className={styles.wfPos}>+{fmt(lunchHoursPerYear)}</span>
+                    </div>
+                  )}
+                  {hasVacation && (
+                    <div className={styles.wfRow}>
+                      <span className={styles.wfLabel}>Ekstra feriedage</span>
+                      <span className={styles.wfPos}>+{fmt(vacationHoursPerYear)}</span>
+                    </div>
+                  )}
+                  {hasCommute && (
+                    <div className={styles.wfRow}>
+                      <span className={styles.wfLabel}>Pendlingstid</span>
+                      <span className={styles.wfNeg}>−{fmt(commuteHoursAnnual)}</span>
+                    </div>
+                  )}
+                  <div className={`${styles.wfRow} ${styles.wfTotalRow}`}>
+                    <span className={styles.wfLabel}>Netto</span>
+                    <span className={totalHours >= 0 ? styles.wfTotal : styles.wfNeg}>
+                      {totalHours >= 0 ? '+' : '−'}{fmt(Math.abs(totalHours))}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className={styles.emptyState}>Ingen tidseffekter at vise</div>
+              );
+            })()
+          )}
+        </div>
       </div>
     </div>
   );

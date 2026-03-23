@@ -1,5 +1,6 @@
-export interface BenefitField {
-  enabled: boolean;
+export interface CustomBenefit {
+  id: string;
+  label: string;
   valuePerMonth: number;
 }
 
@@ -14,14 +15,13 @@ export interface Package {
   ferietillaegPct: number;
   // Arbejdstid & Pendling
   weeklyHours: number;
+  betaltFrokost: boolean;
   commuteMinutesPerDay: number;
   monthlyCommuteCost: number;
   remoteDaysPerWeek: number;
   // Goder
   extraVacationDays: number;
-  healthInsurance: BenefitField;
-  freeFood: BenefitField;
-  phoneComputerCar: BenefitField;
+  benefits: CustomBenefit[];
 }
 
 export interface BreakdownItem {
@@ -35,4 +35,12 @@ export interface CalculationResult {
   effectiveHourlyRateIncCommute: number;
   estimatedMonthlyTakeHome: number;
   breakdown: BreakdownItem[];
+  baseHourlyRate: number;
+  contractualHourlyRate: number;
+  lunchHourlyImpact: number;
+  commuteHourlyImpact: number;
+  betaltFrokost: boolean;
+  commuteHoursPerYear: number;
+  vacationAnnualValue: number;
+  extraVacationDays: number;
 }

@@ -1,60 +1,53 @@
 .grid {
-  display: grid;
-  grid-template-columns: 170px repeat(var(--pkg-count), 1fr);
+  display: flex;
+  gap: 3rem;
+  align-items: flex-start;
+}
+
+/* ── Package column ─────────────────────────────────────── */
+.column {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
   min-width: 0;
 }
 
-/* Empty placeholder cell in header row */
-.labelCell {
-  background: var(--surface-2);
-  border-right: 1px solid var(--border-light);
-}
-
-.sectionHeader {
-  grid-column: 1 / -1;
-  padding: 0.4rem 1.25rem;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.62rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--text-3);
-  background: var(--surface-2);
-  border-top: 1px solid var(--border-light);
-  border-bottom: 1px solid var(--border-light);
-}
-
-/* ── Package header cell ─────────────────────────────────── */
-.packageHeader {
+.columnHeader {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: var(--surface);
-  border-right: 1px solid var(--border-light);
-  border-top: 3px solid var(--pkg-color, var(--c0));
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
 }
 
-.packageNameInput {
-  flex: 1;
-  min-width: 0;
+.packageNameActive {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--brand);
   background: transparent;
   border: none;
-  color: var(--text-1);
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 600;
   padding: 0;
-  letter-spacing: 0.01em;
+  cursor: text;
 }
 
-.packageNameInput:focus {
+.packageNameInactive {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-2);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: text;
+}
+
+.packageNameActive:focus,
+.packageNameInactive:focus {
   outline: none;
-  color: var(--text-1);
 }
-
-.packageNameInput::placeholder { color: var(--text-3); }
 
 .removeButton {
   background: none;
@@ -65,18 +58,260 @@
   cursor: pointer;
   padding: 0.2rem 0.3rem;
   border-radius: 4px;
-  flex-shrink: 0;
   transition: all 0.15s;
 }
 
 .removeButton:hover {
-  color: var(--negative);
-  background: rgba(197,48,48,.08);
+  color: #B91C1C;
+  background: rgba(185,28,28,.08);
 }
 
-/* ── Responsive ─────────────────────────────────────────── */
-@media (max-width: 640px) {
-  .grid { grid-template-columns: 1fr; }
-  .sectionHeader { grid-column: 1; }
-  .labelCell { display: none; }
+/* ── Field group ────────────────────────────────────────── */
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.fieldLabel {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.63rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+}
+
+.input {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.9rem;
+  color: var(--text-1);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(84,110,122,.15);
+}
+
+.input::placeholder {
+  color: var(--text-3);
+}
+
+/* ── Paired fields row ──────────────────────────────────── */
+.fieldRow {
+  display: flex;
+  gap: 1rem;
+}
+
+.fieldRow .fieldGroup {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Input group (input + suffix badge) ─────────────────── */
+.inputGroup {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.inputGroup:focus-within {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(84,110,122,.15);
+}
+
+.inputGroup .input {
+  border: none;
+  border-radius: 0;
+  flex: 1;
+  min-width: 0;
+  box-shadow: none !important;
+}
+
+.suffix {
+  padding: 0 0.6rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-3);
+  background: var(--surface-2);
+  border-left: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+/* ── Benefit field ──────────────────────────────────────── */
+.benefitCell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.toggle input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 28px;
+  height: 16px;
+  background: var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.22s;
+}
+
+.toggle input[type="checkbox"]::before {
+  content: '';
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #fff;
+  top: 2.5px;
+  left: 2.5px;
+  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 1px 3px rgba(0,0,0,.18);
+}
+
+.toggle input[type="checkbox"]:checked {
+  background: var(--brand);
+}
+
+.toggle input[type="checkbox"]:checked::before {
+  transform: translateX(12px);
+}
+
+.toggleLabel {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.valueInput {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--text-1);
+  background: var(--surface-2);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.valueInput:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(84,110,122,.15);
+}
+
+.valueInput::placeholder { color: var(--text-3); }
+
+/* ── Custom benefits list ───────────────────────────────── */
+.benefitRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.benefitLabelInput {
+  flex: 1;
+  min-width: 0;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-1);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.benefitLabelInput:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(84,110,122,.15);
+}
+
+.benefitLabelInput::placeholder { color: var(--text-3); }
+
+.benefitRow .inputGroup {
+  flex: 0 0 auto;
+  width: 7rem;
+}
+
+.removeBenefitButton {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.2rem 0.3rem;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.removeBenefitButton:hover {
+  color: #B91C1C;
+  background: rgba(185,28,28,.08);
+}
+
+.addBenefitButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: all 0.15s;
+  width: 100%;
+  justify-content: center;
+}
+
+.addBenefitButton:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+  background: rgba(84,110,122,.04);
+}
+
+/* ── Section separator ─────────────────────────────────── */
+.sectionLabel {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-3);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-light);
+  margin-top: 0.25rem;
 }

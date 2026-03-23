@@ -18,10 +18,7 @@ export function calculate(pkg: Package): CalculationResult {
   const monthlyOwnPension = pkg.monthlySalary * pkg.ownPensionPct / 100;
   const ferietillaeg = annualSalary * pkg.ferietillaegPct / 100;
 
-  const benefitsAnnual =
-    (pkg.healthInsurance.enabled ? pkg.healthInsurance.valuePerMonth * 12 : 0) +
-    (pkg.freeFood.enabled ? pkg.freeFood.valuePerMonth * 12 : 0) +
-    (pkg.phoneComputerCar.enabled ? pkg.phoneComputerCar.valuePerMonth * 12 : 0);
+  const benefitsAnnual = pkg.benefits.reduce((sum, b) => sum + b.valuePerMonth * 12, 0);
 
   const vacationValue =
     WORKING_DAYS_PER_YEAR > 0
@@ -39,13 +36,13 @@ export function calculate(pkg: Package): CalculationResult {
     annualPension +
     ferietillaeg +
     pkg.yearlyBonus +
-    benefitsAnnual +
-    vacationValue -
+    benefitsAnnual -
     annualCommuteCost;
 
   const commuteDaysPerYear = commuteDaysPerWeek * WEEKS_PER_YEAR;
   const commuteHoursPerYear = commuteDaysPerYear * (pkg.commuteMinutesPerDay / 60);
-  const workHoursPerYear = pkg.weeklyHours * WEEKS_PER_YEAR;
+  const effectiveWeeklyHours = pkg.weeklyHours + (pkg.betaltFrokost ? 0 : 2.5);
+  const workHoursPerYear = effectiveWeeklyHours * WEEKS_PER_YEAR;
 
   const effectiveHourlyRateExCommute = workHoursPerYear === 0 ? 0 : totalAnnualComp / workHoursPerYear;
   const effectiveHourlyRateIncCommute = (workHoursPerYear + commuteHoursPerYear) === 0 ? 0 : totalAnnualComp / (workHoursPerYear + commuteHoursPerYear);
@@ -58,14 +55,22 @@ export function calculate(pkg: Package): CalculationResult {
     { label: pkg.ownPensionPct > 0 ? `Pension eget bidrag (${pkg.ownPensionPct}%)` : 'Pension eget bidrag', monthlyDKK: -monthlyOwnPension },
     { label: 'Bonus', monthlyDKK: pkg.yearlyBonus / 12 },
     { label: pkg.ferietillaegPct > 0 ? `Ferietillæg (${pkg.ferietillaegPct}%)` : 'Ferietillæg', monthlyDKK: ferietillaeg / 12 },
-    { label: pkg.extraVacationDays > 0 ? `Ekstra ferie (${pkg.extraVacationDays} dage)` : 'Ekstra ferie', monthlyDKK: vacationValue / 12 },
-    { label: 'Sundhedsforsikring', monthlyDKK: pkg.healthInsurance.enabled ? pkg.healthInsurance.valuePerMonth : 0 },
-    { label: 'Frokostordning', monthlyDKK: pkg.freeFood.enabled ? pkg.freeFood.valuePerMonth : 0 },
-    { label: 'Fri tlf/computer/bil', monthlyDKK: pkg.phoneComputerCar.enabled ? pkg.phoneComputerCar.valuePerMonth : 0 },
+    ...pkg.benefits.map(b => ({ label: b.label || 'Gode', monthlyDKK: b.valuePerMonth })),
     { label: 'Pendling', monthlyDKK: -effectiveMonthlyCommuteCost },
   ];
 
-  return { totalAnnualComp, effectiveHourlyRateExCommute, effectiveHourlyRateIncCommute, estimatedMonthlyTakeHome, breakdown };
+  const contractualHourlyRate = pkg.weeklyHours > 0
+    ? totalAnnualComp / (pkg.weeklyHours * WEEKS_PER_YEAR)
+    : 0;
+  // Baseline always assumes unpaid lunch (weeklyHours + 2.5)
+  const baseHourlyRate = pkg.weeklyHours > 0
+    ? totalAnnualComp / ((pkg.weeklyHours + 2.5) * WEEKS_PER_YEAR)
+    : 0;
+  // Positive when betaltFrokost (gain vs baseline), zero when unpaid (baseline already reflects it)
+  const lunchHourlyImpact = pkg.betaltFrokost ? contractualHourlyRate - baseHourlyRate : 0;
+  const commuteHourlyImpact = commuteHoursPerYear > 0 ? effectiveHourlyRateIncCommute - effectiveHourlyRateExCommute : 0;
+
+  return { totalAnnualComp, effectiveHourlyRateExCommute, effectiveHourlyRateIncCommute, estimatedMonthlyTakeHome, breakdown, baseHourlyRate, contractualHourlyRate, lunchHourlyImpact, commuteHourlyImpact, commuteHoursPerYear, vacationAnnualValue: vacationValue, extraVacationDays: pkg.extraVacationDays, betaltFrokost: pkg.betaltFrokost };
 }
 
 /** Drop rows that are zero across every result, keeping the rest in sync. */

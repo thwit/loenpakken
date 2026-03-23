@@ -12,15 +12,14 @@ function coercePackage(raw: unknown): Package {
   if (typeof raw !== 'object' || raw === null) return defaults;
   const r = raw as Record<string, unknown>;
 
-  function benefitField(val: unknown, def: { enabled: boolean; valuePerMonth: number }) {
-    if (typeof val !== 'object' || val === null) return def;
-    const v = val as Record<string, unknown>;
-    return {
-      enabled: typeof v.enabled === 'boolean' ? v.enabled : def.enabled,
-      valuePerMonth:
-        typeof v.valuePerMonth === 'number' ? v.valuePerMonth : def.valuePerMonth,
-    };
-  }
+  const rawBenefits = Array.isArray(r.benefits) ? r.benefits : [];
+  const benefits = rawBenefits
+    .filter((b): b is Record<string, unknown> => typeof b === 'object' && b !== null)
+    .map(b => ({
+      id: typeof b.id === 'string' ? b.id : crypto.randomUUID(),
+      label: typeof b.label === 'string' ? b.label : '',
+      valuePerMonth: typeof b.valuePerMonth === 'number' ? b.valuePerMonth : 0,
+    }));
 
   return {
     id: typeof r.id === 'string' ? r.id : crypto.randomUUID(),
@@ -31,6 +30,7 @@ function coercePackage(raw: unknown): Package {
     yearlyBonus: typeof r.yearlyBonus === 'number' ? r.yearlyBonus : 0,
     ferietillaegPct: typeof r.ferietillaegPct === 'number' ? r.ferietillaegPct : 1,
     weeklyHours: typeof r.weeklyHours === 'number' ? r.weeklyHours : 37,
+    betaltFrokost: typeof r.betaltFrokost === 'boolean' ? r.betaltFrokost : true,
     commuteMinutesPerDay:
       typeof r.commuteMinutesPerDay === 'number' ? r.commuteMinutesPerDay : 0,
     monthlyCommuteCost:
@@ -39,9 +39,7 @@ function coercePackage(raw: unknown): Package {
       typeof r.remoteDaysPerWeek === 'number' ? r.remoteDaysPerWeek : 0,
     extraVacationDays:
       typeof r.extraVacationDays === 'number' ? r.extraVacationDays : 0,
-    healthInsurance: benefitField(r.healthInsurance, defaults.healthInsurance),
-    freeFood: benefitField(r.freeFood, defaults.freeFood),
-    phoneComputerCar: benefitField(r.phoneComputerCar, defaults.phoneComputerCar),
+    benefits,
   };
 }
 
