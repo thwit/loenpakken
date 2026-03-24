@@ -86,11 +86,18 @@ function PackageColumn({ pkg, index, dispatch }: ColumnProps) {
 
       <div className={styles.sectionLabel}>Løn</div>
 
-      <Field
-        label="Månedlig grundløn (DKK)"
-        value={pkg.monthlySalary}
-        onChange={v => upd('monthlySalary', v)}
-      />
+      <div className={styles.fieldRow}>
+        <Field
+          label="Månedlig grundløn (DKK)"
+          value={pkg.monthlySalary}
+          onChange={v => upd('monthlySalary', v)}
+        />
+        <Field
+          label="Årlig bonus (DKK)"
+          value={pkg.yearlyBonus}
+          onChange={v => upd('yearlyBonus', v)}
+        />
+      </div>
 
       <div className={styles.fieldRow}>
         <Field
@@ -113,17 +120,21 @@ function PackageColumn({ pkg, index, dispatch }: ColumnProps) {
 
       <div className={styles.fieldRow}>
         <Field
-          label="Årlig bonus (DKK)"
-          value={pkg.yearlyBonus}
-          onChange={v => upd('yearlyBonus', v)}
-        />
-        <Field
           label="Ferietillæg (%)"
           value={pkg.ferietillaegPct}
           onChange={v => upd('ferietillaegPct', v)}
           suffix="%"
           min={0}
           max={100}
+        />
+        <Field
+          label="Fritvalgskonto (%)"
+          value={pkg.fritvalgPct}
+          onChange={v => upd('fritvalgPct', v)}
+          suffix="%"
+          min={0}
+          max={100}
+          tooltip="Typisk 1–8% af grundlønnen, frit disponibelt (udbetaling, pension, ferie m.m.). Tælles her som ekstra løn oven i grundlønnen."
         />
       </div>
 
@@ -193,7 +204,7 @@ function PackageColumn({ pkg, index, dispatch }: ColumnProps) {
             className={styles.benefitLabelInput}
             type="text"
             value={b.label}
-            placeholder="Navn på gode"
+            placeholder="Navn på gode eller tillæg"
             onChange={e => dispatch({ type: 'UPDATE_BENEFIT', id: pkg.id, benefitId: b.id, key: 'label', value: e.target.value })}
           />
           <div className={styles.inputGroup}>
@@ -217,7 +228,7 @@ function PackageColumn({ pkg, index, dispatch }: ColumnProps) {
       <button
         className={styles.addBenefitButton}
         onClick={() => dispatch({ type: 'ADD_BENEFIT', id: pkg.id })}
-      >+ Tilføj gode</button>
+      >+ Tilføje gode eller tillæg</button>
     </div>
   );
 }

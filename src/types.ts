@@ -13,6 +13,7 @@ export interface Package {
   ownPensionPct: number;
   yearlyBonus: number;
   ferietillaegPct: number;
+  fritvalgPct: number;
   // Arbejdstid & Pendling
   weeklyHours: number;
   betaltFrokost: boolean;

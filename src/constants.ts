@@ -14,6 +14,7 @@ export function createDefaultPackage(name: string): Package {
     ownPensionPct: 0,
     yearlyBonus: 0,
     ferietillaegPct: 0,
+    fritvalgPct: 0,
     weeklyHours: 37,
     betaltFrokost: false,
     commuteMinutesPerDay: 0,

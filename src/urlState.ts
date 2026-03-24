@@ -10,6 +10,7 @@ function encodePackage(pkg: Package, defaultName: string, params: URLSearchParam
   if (pkg.ownPensionPct !== 0)       params.set(`${p}.op`, String(pkg.ownPensionPct));
   if (pkg.yearlyBonus !== 0)         params.set(`${p}.yb`, String(pkg.yearlyBonus));
   if (pkg.ferietillaegPct !== 0)     params.set(`${p}.fp`, String(pkg.ferietillaegPct));
+  if (pkg.fritvalgPct !== 0)         params.set(`${p}.fv`, String(pkg.fritvalgPct));
   if (pkg.weeklyHours !== DEFAULT_WEEKLY_HOURS) params.set(`${p}.wh`, String(pkg.weeklyHours));
   if (pkg.betaltFrokost)             params.set(`${p}.bf`, '1');
   if (pkg.commuteMinutesPerDay !== 0) params.set(`${p}.cm`, String(pkg.commuteMinutesPerDay));
@@ -52,6 +53,7 @@ function decodePackage(params: URLSearchParams, p: string, defaultName: string):
     ownPensionPct: num(`${p}.op`),
     yearlyBonus: num(`${p}.yb`),
     ferietillaegPct: num(`${p}.fp`),
+    fritvalgPct: num(`${p}.fv`),
     weeklyHours: num(`${p}.wh`, DEFAULT_WEEKLY_HOURS),
     betaltFrokost: params.get(`${p}.bf`) === '1',
     commuteMinutesPerDay: num(`${p}.cm`),

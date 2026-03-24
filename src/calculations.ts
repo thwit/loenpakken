@@ -17,6 +17,7 @@ export function calculate(pkg: Package): CalculationResult {
   const annualPension = monthlyPension * 12;
   const monthlyOwnPension = pkg.monthlySalary * pkg.ownPensionPct / 100;
   const ferietillaeg = annualSalary * pkg.ferietillaegPct / 100;
+  const fritvalgAnnual = annualSalary * pkg.fritvalgPct / 100;
 
   const benefitsAnnual = pkg.benefits.reduce((sum, b) => sum + b.valuePerMonth * 12, 0);
 
@@ -35,6 +36,7 @@ export function calculate(pkg: Package): CalculationResult {
     annualSalary +
     annualPension +
     ferietillaeg +
+    fritvalgAnnual +
     pkg.yearlyBonus +
     benefitsAnnual -
     annualCommuteCost;
@@ -57,6 +59,7 @@ export function calculate(pkg: Package): CalculationResult {
     { label: pkg.ownPensionPct > 0 ? `Pension eget bidrag (${pkg.ownPensionPct}%)` : 'Pension eget bidrag', monthlyDKK: -monthlyOwnPension },
     { label: 'Bonus', monthlyDKK: pkg.yearlyBonus / 12 },
     { label: pkg.ferietillaegPct > 0 ? `Ferietillæg (${pkg.ferietillaegPct}%)` : 'Ferietillæg', monthlyDKK: ferietillaeg / 12 },
+    { label: pkg.fritvalgPct > 0 ? `Fritvalgskonto (${pkg.fritvalgPct}%)` : 'Fritvalgskonto', monthlyDKK: fritvalgAnnual / 12 },
     ...pkg.benefits.map(b => ({ label: b.label || 'Gode', monthlyDKK: b.valuePerMonth })),
     { label: 'Pendling', monthlyDKK: -effectiveMonthlyCommuteCost },
   ];
