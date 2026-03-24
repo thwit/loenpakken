@@ -1,88 +1,76 @@
-import { deflateSync, inflateSync, strToU8, strFromU8 } from 'fflate';
 import type { Package, CustomBenefit } from './types';
 
-// ── Compact schema (short keys to reduce payload size) ──────────────────────
-interface Compact {
-  i: string;   // id
-  n: string;   // name
-  ms: number;  // monthlySalary
-  pp: number;  // pensionPct
-  op: number;  // ownPensionPct
-  yb: number;  // yearlyBonus
-  fp: number;  // ferietillaegPct
-  wh: number;  // weeklyHours
-  bf: boolean; // betaltFrokost
-  cm: number;  // commuteMinutesPerDay
-  mc: number;  // monthlyCommuteCost
-  rd: number;  // remoteDaysPerWeek
-  ev: number;  // extraVacationDays
-  b: Array<{ i: string; l: string; v: number }>; // benefits
+const DEFAULT_NAMES = ['Nuværende', 'Jobtilbud'];
+const DEFAULT_WEEKLY_HOURS = 37;
+
+function encodePackage(pkg: Package, defaultName: string, params: URLSearchParams, p: string) {
+  if (pkg.name !== defaultName)      params.set(`${p}.n`,  pkg.name);
+  if (pkg.monthlySalary !== 0)       params.set(`${p}.ms`, String(pkg.monthlySalary));
+  if (pkg.pensionPct !== 0)          params.set(`${p}.pp`, String(pkg.pensionPct));
+  if (pkg.ownPensionPct !== 0)       params.set(`${p}.op`, String(pkg.ownPensionPct));
+  if (pkg.yearlyBonus !== 0)         params.set(`${p}.yb`, String(pkg.yearlyBonus));
+  if (pkg.ferietillaegPct !== 0)     params.set(`${p}.fp`, String(pkg.ferietillaegPct));
+  if (pkg.weeklyHours !== DEFAULT_WEEKLY_HOURS) params.set(`${p}.wh`, String(pkg.weeklyHours));
+  if (pkg.betaltFrokost)             params.set(`${p}.bf`, '1');
+  if (pkg.commuteMinutesPerDay !== 0) params.set(`${p}.cm`, String(pkg.commuteMinutesPerDay));
+  if (pkg.monthlyCommuteCost !== 0)  params.set(`${p}.mc`, String(pkg.monthlyCommuteCost));
+  if (pkg.remoteDaysPerWeek !== 0)   params.set(`${p}.rd`, String(pkg.remoteDaysPerWeek));
+  if (pkg.extraVacationDays !== 0)   params.set(`${p}.ev`, String(pkg.extraVacationDays));
+  if (pkg.benefits.length > 0) {
+    params.set(`${p}.b`, pkg.benefits.map(b => `${encodeURIComponent(b.label)}:${b.valuePerMonth}`).join('|'));
+  }
 }
 
-function toCompact(pkg: Package): Compact {
-  return {
-    i: pkg.id, n: pkg.name,
-    ms: pkg.monthlySalary, pp: pkg.pensionPct, op: pkg.ownPensionPct,
-    yb: pkg.yearlyBonus, fp: pkg.ferietillaegPct,
-    wh: pkg.weeklyHours, bf: pkg.betaltFrokost,
-    cm: pkg.commuteMinutesPerDay, mc: pkg.monthlyCommuteCost,
-    rd: pkg.remoteDaysPerWeek, ev: pkg.extraVacationDays,
-    b: pkg.benefits.map(b => ({ i: b.id, l: b.label, v: b.valuePerMonth })),
-  };
+export function encodeState(packages: Package[]): void {
+  const params = new URLSearchParams();
+  encodePackage(packages[0], DEFAULT_NAMES[0], params, 'a');
+  encodePackage(packages[1], DEFAULT_NAMES[1], params, 'b');
+  const str = params.toString();
+  history.replaceState(null, '', str ? `#${str}` : location.pathname + location.search);
 }
 
-function fromCompact(c: Compact): Package {
-  const benefits: CustomBenefit[] = (c.b ?? []).map(b => ({
-    id: typeof b.i === 'string' ? b.i : crypto.randomUUID(),
-    label: typeof b.l === 'string' ? b.l : '',
-    valuePerMonth: typeof b.v === 'number' ? b.v : 0,
-  }));
+function decodePackage(params: URLSearchParams, p: string, defaultName: string): Package {
+  const benefitsRaw = params.get(`${p}.b`);
+  const benefits: CustomBenefit[] = benefitsRaw
+    ? benefitsRaw.split('|').map(part => {
+        const cut = part.lastIndexOf(':');
+        return {
+          id: crypto.randomUUID(),
+          label: decodeURIComponent(part.slice(0, cut)),
+          valuePerMonth: parseFloat(part.slice(cut + 1)) || 0,
+        };
+      })
+    : [];
+
+  const num = (key: string, fallback = 0) => parseFloat(params.get(key) ?? '') || fallback;
+
   return {
-    id: typeof c.i === 'string' ? c.i : crypto.randomUUID(),
-    name: typeof c.n === 'string' ? c.n : 'Pakke',
-    monthlySalary: c.ms ?? 0,
-    pensionPct: c.pp ?? 0,
-    ownPensionPct: c.op ?? 0,
-    yearlyBonus: c.yb ?? 0,
-    ferietillaegPct: c.fp ?? 0,
-    weeklyHours: c.wh ?? 37,
-    betaltFrokost: typeof c.bf === 'boolean' ? c.bf : true,
-    commuteMinutesPerDay: c.cm ?? 0,
-    monthlyCommuteCost: c.mc ?? 0,
-    remoteDaysPerWeek: c.rd ?? 0,
-    extraVacationDays: c.ev ?? 0,
+    id: crypto.randomUUID(),
+    name: params.get(`${p}.n`) ?? defaultName,
+    monthlySalary: num(`${p}.ms`),
+    pensionPct: num(`${p}.pp`),
+    ownPensionPct: num(`${p}.op`),
+    yearlyBonus: num(`${p}.yb`),
+    ferietillaegPct: num(`${p}.fp`),
+    weeklyHours: num(`${p}.wh`, DEFAULT_WEEKLY_HOURS),
+    betaltFrokost: params.get(`${p}.bf`) === '1',
+    commuteMinutesPerDay: num(`${p}.cm`),
+    monthlyCommuteCost: num(`${p}.mc`),
+    remoteDaysPerWeek: num(`${p}.rd`),
+    extraVacationDays: num(`${p}.ev`),
     benefits,
   };
 }
 
-// ── Encoding ─────────────────────────────────────────────────────────────────
-function toUrlSafeBase64(bytes: Uint8Array): string {
-  return btoa(String.fromCharCode(...bytes))
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-function fromUrlSafeBase64(s: string): Uint8Array {
-  const b64 = s.replace(/-/g, '+').replace(/_/g, '/');
-  const bin = atob(b64);
-  return Uint8Array.from(bin, c => c.charCodeAt(0));
-}
-
-export function encodeState(packages: Package[]): void {
-  const json = JSON.stringify(packages.map(toCompact));
-  const compressed = deflateSync(strToU8(json), { level: 9 });
-  const b64 = toUrlSafeBase64(compressed);
-  history.replaceState(null, '', `#s=${b64}`);
-}
-
 export function decodeState(): Package[] | null {
-  const hash = window.location.hash;
-  const match = hash.match(/^#s=(.+)$/);
-  if (!match) return null;
+  const hash = window.location.hash.slice(1);
+  if (!hash) return null;
   try {
-    const bytes = fromUrlSafeBase64(match[1]);
-    const json = strFromU8(inflateSync(bytes));
-    const raw = JSON.parse(json);
-    if (!Array.isArray(raw) || raw.length !== 2) return null;
-    return (raw as Compact[]).map(fromCompact);
+    const params = new URLSearchParams(hash);
+    if (!Array.from(params.keys()).some(k => k.startsWith('a.') || k.startsWith('b.'))) return null;
+    return [
+      decodePackage(params, 'a', DEFAULT_NAMES[0]),
+      decodePackage(params, 'b', DEFAULT_NAMES[1]),
+    ];
   } catch { return null; }
 }
