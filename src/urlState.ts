@@ -1,63 +1,88 @@
-import type { Package } from './types';
-import { createDefaultPackage } from './constants';
+import { deflateSync, inflateSync, strToU8, strFromU8 } from 'fflate';
+import type { Package, CustomBenefit } from './types';
 
-function encode(packages: Package[]): string {
-  const json = JSON.stringify(packages);
-  const b64 = btoa(unescape(encodeURIComponent(json)));
-  return b64;
+// ── Compact schema (short keys to reduce payload size) ──────────────────────
+interface Compact {
+  i: string;   // id
+  n: string;   // name
+  ms: number;  // monthlySalary
+  pp: number;  // pensionPct
+  op: number;  // ownPensionPct
+  yb: number;  // yearlyBonus
+  fp: number;  // ferietillaegPct
+  wh: number;  // weeklyHours
+  bf: boolean; // betaltFrokost
+  cm: number;  // commuteMinutesPerDay
+  mc: number;  // monthlyCommuteCost
+  rd: number;  // remoteDaysPerWeek
+  ev: number;  // extraVacationDays
+  b: Array<{ i: string; l: string; v: number }>; // benefits
 }
 
-function coercePackage(raw: unknown): Package {
-  const defaults = createDefaultPackage('Pakke');
-  if (typeof raw !== 'object' || raw === null) return defaults;
-  const r = raw as Record<string, unknown>;
-
-  const rawBenefits = Array.isArray(r.benefits) ? r.benefits : [];
-  const benefits = rawBenefits
-    .filter((b): b is Record<string, unknown> => typeof b === 'object' && b !== null)
-    .map(b => ({
-      id: typeof b.id === 'string' ? b.id : crypto.randomUUID(),
-      label: typeof b.label === 'string' ? b.label : '',
-      valuePerMonth: typeof b.valuePerMonth === 'number' ? b.valuePerMonth : 0,
-    }));
-
+function toCompact(pkg: Package): Compact {
   return {
-    id: typeof r.id === 'string' ? r.id : crypto.randomUUID(),
-    name: typeof r.name === 'string' ? r.name : defaults.name,
-    monthlySalary: typeof r.monthlySalary === 'number' ? r.monthlySalary : 0,
-    pensionPct: typeof r.pensionPct === 'number' ? r.pensionPct : 0,
-    ownPensionPct: typeof r.ownPensionPct === 'number' ? r.ownPensionPct : 0,
-    yearlyBonus: typeof r.yearlyBonus === 'number' ? r.yearlyBonus : 0,
-    ferietillaegPct: typeof r.ferietillaegPct === 'number' ? r.ferietillaegPct : 1,
-    weeklyHours: typeof r.weeklyHours === 'number' ? r.weeklyHours : 37,
-    betaltFrokost: typeof r.betaltFrokost === 'boolean' ? r.betaltFrokost : true,
-    commuteMinutesPerDay:
-      typeof r.commuteMinutesPerDay === 'number' ? r.commuteMinutesPerDay : 0,
-    monthlyCommuteCost:
-      typeof r.monthlyCommuteCost === 'number' ? r.monthlyCommuteCost : 0,
-    remoteDaysPerWeek:
-      typeof r.remoteDaysPerWeek === 'number' ? r.remoteDaysPerWeek : 0,
-    extraVacationDays:
-      typeof r.extraVacationDays === 'number' ? r.extraVacationDays : 0,
+    i: pkg.id, n: pkg.name,
+    ms: pkg.monthlySalary, pp: pkg.pensionPct, op: pkg.ownPensionPct,
+    yb: pkg.yearlyBonus, fp: pkg.ferietillaegPct,
+    wh: pkg.weeklyHours, bf: pkg.betaltFrokost,
+    cm: pkg.commuteMinutesPerDay, mc: pkg.monthlyCommuteCost,
+    rd: pkg.remoteDaysPerWeek, ev: pkg.extraVacationDays,
+    b: pkg.benefits.map(b => ({ i: b.id, l: b.label, v: b.valuePerMonth })),
+  };
+}
+
+function fromCompact(c: Compact): Package {
+  const benefits: CustomBenefit[] = (c.b ?? []).map(b => ({
+    id: typeof b.i === 'string' ? b.i : crypto.randomUUID(),
+    label: typeof b.l === 'string' ? b.l : '',
+    valuePerMonth: typeof b.v === 'number' ? b.v : 0,
+  }));
+  return {
+    id: typeof c.i === 'string' ? c.i : crypto.randomUUID(),
+    name: typeof c.n === 'string' ? c.n : 'Pakke',
+    monthlySalary: c.ms ?? 0,
+    pensionPct: c.pp ?? 0,
+    ownPensionPct: c.op ?? 0,
+    yearlyBonus: c.yb ?? 0,
+    ferietillaegPct: c.fp ?? 0,
+    weeklyHours: c.wh ?? 37,
+    betaltFrokost: typeof c.bf === 'boolean' ? c.bf : true,
+    commuteMinutesPerDay: c.cm ?? 0,
+    monthlyCommuteCost: c.mc ?? 0,
+    remoteDaysPerWeek: c.rd ?? 0,
+    extraVacationDays: c.ev ?? 0,
     benefits,
   };
 }
 
+// ── Encoding ─────────────────────────────────────────────────────────────────
+function toUrlSafeBase64(bytes: Uint8Array): string {
+  return btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function fromUrlSafeBase64(s: string): Uint8Array {
+  const b64 = s.replace(/-/g, '+').replace(/_/g, '/');
+  const bin = atob(b64);
+  return Uint8Array.from(bin, c => c.charCodeAt(0));
+}
+
 export function encodeState(packages: Package[]): void {
-  const b64 = encode(packages);
-  history.replaceState(null, '', `#state=${b64}`);
+  const json = JSON.stringify(packages.map(toCompact));
+  const compressed = deflateSync(strToU8(json), { level: 9 });
+  const b64 = toUrlSafeBase64(compressed);
+  history.replaceState(null, '', `#s=${b64}`);
 }
 
 export function decodeState(): Package[] | null {
   const hash = window.location.hash;
-  const match = hash.match(/^#state=(.+)$/);
+  const match = hash.match(/^#s=(.+)$/);
   if (!match) return null;
   try {
-    const json = decodeURIComponent(escape(atob(match[1])));
+    const bytes = fromUrlSafeBase64(match[1]);
+    const json = strFromU8(inflateSync(bytes));
     const raw = JSON.parse(json);
-    if (!Array.isArray(raw)) return null;
-    return raw.map(coercePackage);
-  } catch {
-    return null;
-  }
+    if (!Array.isArray(raw) || raw.length !== 2) return null;
+    return (raw as Compact[]).map(fromCompact);
+  } catch { return null; }
 }
