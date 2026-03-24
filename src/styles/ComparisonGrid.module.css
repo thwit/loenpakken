@@ -359,6 +359,31 @@
   display: block;
 }
 
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .grid {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .grid {
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .column {
+    width: 100%;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .column:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+}
+
 /* ── Section separator ─────────────────────────────────── */
 .sectionLabel {
   font-family: 'Plus Jakarta Sans', sans-serif;

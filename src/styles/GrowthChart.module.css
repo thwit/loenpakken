@@ -9,6 +9,13 @@
   min-width: 320px;
 }
 
+@media (max-width: 600px) {
+  .card {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
 /* ── Top bar ── */
 .topBar {
   display: flex;
