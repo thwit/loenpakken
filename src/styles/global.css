@@ -37,6 +37,17 @@ html {
 
 body { margin: 0; }
 
+[data-theme="dark"] {
+  --bg:           #0F1117;
+  --surface:      #1A1D27;
+  --surface-2:    #22263A;
+  --border:       #2E3347;
+  --border-light: #252940;
+  --text-1:       #E8EAF0;
+  --text-2:       #BFC4D6;
+  --text-3:       #6B7299;
+}
+
 input[type="number"] { -moz-appearance: textfield; }
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }

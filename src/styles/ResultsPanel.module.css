@@ -6,7 +6,20 @@
   min-width: 0;
 }
 
-.panelLight { background: var(--card-light-bg); }
+.panelLight {
+  background: var(--card-light-bg);
+  /* Pin all tokens so dark mode never bleeds in */
+  --brand:        #546E7A;
+  --text-1:       #263238;
+  --text-2:       #37474F;
+  --text-3:       #90A4AE;
+  --border:       #CBD5DC;
+  --border-light: #E4EAED;
+  --surface:      #FFFFFF;
+  --surface-2:    #F5F7F8;
+  --positive:     #166534;
+  --negative:     #B91C1C;
+}
 .panelDark  { background: var(--card-dark-bg); }
 
 /* ── Header: main focus + stacked secondary ────────────── */
@@ -47,7 +60,7 @@
 /* Main label + value */
 .headerLabel {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.6rem;
+  font-size: 0.85rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.14em;

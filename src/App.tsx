@@ -70,23 +70,33 @@ export default function App() {
   }, [packages]);
 
   const [tab, setTab] = useState<Tab>('timesats');
+  const [darkMode, setDarkMode] = useState(false);
 
   const rawResults = packages.map(pkg => calculate(pkg));
   const normalizedBreakdowns = normalizeBreakdowns(rawResults);
   const results = rawResults.map((r, i) => ({ ...r, breakdown: normalizedBreakdowns[i] }));
 
   return (
-    <div className={styles.app}>
+    <div className={styles.app} data-theme={darkMode ? 'dark' : undefined}>
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <span className={styles.logo}>Lønpakken</span>
-          <ShareButton />
+          <div className={styles.headerActions}>
+            <button
+              className={styles.darkToggle}
+              onClick={() => setDarkMode(d => !d)}
+              aria-label="Skift farvetema"
+            >
+              {darkMode ? '☀' : '☽'}
+            </button>
+            <ShareButton />
+          </div>
         </div>
       </header>
       <main className={styles.main}>
         <ComparisonGrid packages={packages} dispatch={dispatch} />
         <section className={styles.resultsSection}>
-          <h2 className={styles.resultsHeading}>Analyse af Resultat</h2>
+          <h2 className={styles.resultsHeading}>Endelig lønpakke</h2>
           <div className={styles.resultsCards}>
             {packages.map((pkg, i) => (
               <ResultsPanel
