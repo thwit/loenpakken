@@ -258,7 +258,7 @@
 
 .benefitRow .inputGroup {
   flex: 0 0 auto;
-  width: 7rem;
+  width: 9.5rem;
 }
 
 .removeBenefitButton {
@@ -301,6 +301,62 @@
   border-color: var(--brand);
   color: var(--brand);
   background: rgba(84,110,122,.04);
+}
+
+/* ── Tooltip ────────────────────────────────────────────── */
+.fieldLabelRow {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.tooltipWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tooltipIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1px solid var(--text-3);
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--text-3);
+  cursor: default;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.tooltipText {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text-1);
+  color: var(--bg);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  line-height: 1.4;
+  white-space: normal;
+  width: 200px;
+  padding: 0.5rem 0.65rem;
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0,0,0,.18);
+}
+
+.tooltipWrap:hover .tooltipText {
+  display: block;
 }
 
 /* ── Section separator ─────────────────────────────────── */

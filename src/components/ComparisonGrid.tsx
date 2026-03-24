@@ -23,9 +23,10 @@ interface FieldProps {
   min?: number;
   max?: number;
   step?: number | 'any';
+  tooltip?: string;
 }
 
-function Field({ label, value, onChange, suffix, placeholder = '0', min, max, step }: FieldProps) {
+function Field({ label, value, onChange, suffix, placeholder = '0', min, max, step, tooltip }: FieldProps) {
   const inputEl = (
     <input
       type="number"
@@ -41,7 +42,15 @@ function Field({ label, value, onChange, suffix, placeholder = '0', min, max, st
 
   return (
     <div className={styles.fieldGroup}>
-      <span className={styles.fieldLabel}>{label}</span>
+      <div className={styles.fieldLabelRow}>
+        <span className={styles.fieldLabel}>{label}</span>
+        {tooltip && (
+          <span className={styles.tooltipWrap}>
+            <span className={styles.tooltipIcon}>?</span>
+            <span className={styles.tooltipText}>{tooltip}</span>
+          </span>
+        )}
+      </div>
       {suffix ? (
         <div className={styles.inputGroup}>
           {inputEl}
@@ -127,7 +136,13 @@ function PackageColumn({ pkg, index, dispatch }: ColumnProps) {
           onChange={v => upd('weeklyHours', v)}
         />
         <div className={styles.fieldGroup}>
-          <span className={styles.fieldLabel}>Betalt frokost</span>
+          <div className={styles.fieldLabelRow}>
+            <span className={styles.fieldLabel}>Betalt frokost</span>
+            <span className={styles.tooltipWrap}>
+              <span className={styles.tooltipIcon}>?</span>
+              <span className={styles.tooltipText}>Hvis frokosten er ubetalt trækkes pausetiden fra din effektive timesats (typisk 30 min/dag = 2,5 t/uge).</span>
+            </span>
+          </div>
           <div className={styles.benefitCell}>
             <label className={styles.toggle}>
               <input
@@ -145,6 +160,7 @@ function PackageColumn({ pkg, index, dispatch }: ColumnProps) {
           label="Pendling (min/dag)"
           value={pkg.commuteMinutesPerDay}
           onChange={v => upd('commuteMinutesPerDay', v)}
+          tooltip="Samlet pendlingstid per dag (tur-retur). Pendlingstid tæller med i din effektive timesats, da det er tid du bruger på jobbet."
         />
         <Field
           label="Transportomk. (md.)"
@@ -168,6 +184,7 @@ function PackageColumn({ pkg, index, dispatch }: ColumnProps) {
         label="Ekstra feriedage"
         value={pkg.extraVacationDays}
         onChange={v => upd('extraVacationDays', v)}
+        tooltip="Standardferien er 25 dage (5 uger). Angiv kun dage ud over dette. Ekstra feriedage forbedrer din effektive timesats, da du får samme løn for færre arbejdstimer."
       />
 
       {pkg.benefits.map(b => (
