@@ -54,8 +54,8 @@ function reducer(state: Package[], action: Action): Package[] {
 }
 
 const defaultState: Package[] = [
-  createDefaultPackage('Tilbud A'),
-  createDefaultPackage('Tilbud B'),
+  createDefaultPackage('Nuværende'),
+  createDefaultPackage('Jobtilbud'),
 ];
 
 export default function App() {
@@ -105,6 +105,7 @@ export default function App() {
                 variant={i === 1 ? 'dark' : 'light'}
                 tab={tab}
                 onTabChange={setTab}
+                compareResult={i === 1 ? results[0] : undefined}
               />
             ))}
           </div>

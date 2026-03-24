@@ -9,9 +9,10 @@ interface Props {
   variant: 'light' | 'dark';
   tab: Tab;
   onTabChange: (tab: Tab) => void;
+  compareResult?: CalculationResult;
 }
 
-export function ResultsPanel({ result, variant, tab, onTabChange }: Props) {
+export function ResultsPanel({ result, variant, tab, onTabChange, compareResult }: Props) {
   const isDark = variant === 'dark';
   const panelClass = `${styles.panel} ${isDark ? styles.panelDark : styles.panelLight}`;
 
@@ -20,6 +21,14 @@ export function ResultsPanel({ result, variant, tab, onTabChange }: Props) {
 
   function fmtRate(n: number) {
     return `${Math.round(Math.abs(n)).toLocaleString('da-DK')} kr/t`;
+  }
+
+  function pctDiff(current: number, base: number) {
+    if (!compareResult || base === 0) return null;
+    const pct = ((current - base) / base) * 100;
+    const sign = pct >= 0 ? '+' : '−';
+    const cls = pct >= 0 ? styles.diffPos : styles.diffNeg;
+    return <span className={cls}>{sign}{Math.abs(pct).toFixed(1)}%</span>;
   }
   return (
     <div className={panelClass}>
@@ -31,6 +40,7 @@ export function ResultsPanel({ result, variant, tab, onTabChange }: Props) {
             {Math.round(result.effectiveHourlyRateIncCommute).toLocaleString('da-DK')}
             <span className={styles.headerUnit}>kr/t</span>
           </div>
+          {pctDiff(result.effectiveHourlyRateIncCommute, compareResult?.effectiveHourlyRateIncCommute ?? 0)}
         </div>
         <div className={styles.headerColStack}>
           <div className={styles.headerColSub}>
@@ -39,6 +49,7 @@ export function ResultsPanel({ result, variant, tab, onTabChange }: Props) {
               {Math.round(result.contractualHourlyRate).toLocaleString('da-DK')}
               <span className={styles.headerUnitSub}>kr/t</span>
             </div>
+            {pctDiff(result.contractualHourlyRate, compareResult?.contractualHourlyRate ?? 0)}
           </div>
           <div className={styles.headerColSub}>
             <div className={styles.headerLabelSub}>Månedligt total</div>

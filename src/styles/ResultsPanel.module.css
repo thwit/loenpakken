@@ -35,6 +35,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: flex-start;
   padding: 1.75rem 2rem;
   border-right: 1px solid rgba(0,0,0,.08);
 }
@@ -123,6 +124,21 @@
 
 .panelLight .headerUnitSub { color: var(--text-3); }
 .panelDark  .headerUnitSub { color: rgba(255,255,255,.5); }
+
+/* ── Percentage diff badges ────────────────────────────── */
+.diffPos, .diffNeg {
+  display: inline-block;
+  align-self: flex-start;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 0.4rem;
+}
+
+.panelLight .diffPos { color: var(--positive); }
+.panelDark  .diffPos { color: #6ee7b7; }
+.panelLight .diffNeg { color: var(--negative); }
+.panelDark  .diffNeg { color: #fca5a5; }
 
 /* ── Tabbed breakdown section ──────────────────────────── */
 .tabbedSection {
