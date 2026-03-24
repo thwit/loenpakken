@@ -38,6 +38,7 @@ export interface CalculationResult {
   baseHourlyRate: number;
   contractualHourlyRate: number;
   lunchHourlyImpact: number;
+  vacationHourlyImpact: number;
   commuteHourlyImpact: number;
   betaltFrokost: boolean;
   commuteHoursPerYear: number;

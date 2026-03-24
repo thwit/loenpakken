@@ -42,7 +42,9 @@ export function calculate(pkg: Package): CalculationResult {
   const commuteDaysPerYear = commuteDaysPerWeek * WEEKS_PER_YEAR;
   const commuteHoursPerYear = commuteDaysPerYear * (pkg.commuteMinutesPerDay / 60);
   const effectiveWeeklyHours = pkg.weeklyHours + (pkg.betaltFrokost ? 0 : 2.5);
-  const workHoursPerYear = effectiveWeeklyHours * WEEKS_PER_YEAR;
+  const grossWorkHoursPerYear = effectiveWeeklyHours * WEEKS_PER_YEAR;
+  const vacationHoursPerYear = pkg.extraVacationDays * (pkg.weeklyHours / 5);
+  const workHoursPerYear = grossWorkHoursPerYear - vacationHoursPerYear;
 
   const effectiveHourlyRateExCommute = workHoursPerYear === 0 ? 0 : totalAnnualComp / workHoursPerYear;
   const effectiveHourlyRateIncCommute = (workHoursPerYear + commuteHoursPerYear) === 0 ? 0 : totalAnnualComp / (workHoursPerYear + commuteHoursPerYear);
@@ -59,18 +61,21 @@ export function calculate(pkg: Package): CalculationResult {
     { label: 'Pendling', monthlyDKK: -effectiveMonthlyCommuteCost },
   ];
 
+  // R0: contractual rate (paid lunch, no vacation adjustment, no commute)
   const contractualHourlyRate = pkg.weeklyHours > 0
     ? totalAnnualComp / (pkg.weeklyHours * WEEKS_PER_YEAR)
     : 0;
-  // Baseline always assumes unpaid lunch (weeklyHours + 2.5)
-  const baseHourlyRate = pkg.weeklyHours > 0
-    ? totalAnnualComp / ((pkg.weeklyHours + 2.5) * WEEKS_PER_YEAR)
-    : 0;
-  // Positive when betaltFrokost (gain vs baseline), zero when unpaid (baseline already reflects it)
-  const lunchHourlyImpact = pkg.betaltFrokost ? contractualHourlyRate - baseHourlyRate : 0;
+  // R1: after vacation (paid lunch still assumed)
+  const rateAfterVacation = (pkg.weeklyHours * WEEKS_PER_YEAR - vacationHoursPerYear) > 0
+    ? totalAnnualComp / (pkg.weeklyHours * WEEKS_PER_YEAR - vacationHoursPerYear)
+    : contractualHourlyRate;
+  const vacationHourlyImpact = pkg.extraVacationDays > 0 ? rateAfterVacation - contractualHourlyRate : 0;
+  // R2: after lunch adjustment (negative when unpaid, zero when paid)
+  const lunchHourlyImpact = !pkg.betaltFrokost ? effectiveHourlyRateExCommute - rateAfterVacation : 0;
   const commuteHourlyImpact = commuteHoursPerYear > 0 ? effectiveHourlyRateIncCommute - effectiveHourlyRateExCommute : 0;
+  const baseHourlyRate = contractualHourlyRate;
 
-  return { totalAnnualComp, effectiveHourlyRateExCommute, effectiveHourlyRateIncCommute, estimatedMonthlyTakeHome, breakdown, baseHourlyRate, contractualHourlyRate, lunchHourlyImpact, commuteHourlyImpact, commuteHoursPerYear, vacationAnnualValue: vacationValue, extraVacationDays: pkg.extraVacationDays, betaltFrokost: pkg.betaltFrokost };
+  return { totalAnnualComp, effectiveHourlyRateExCommute, effectiveHourlyRateIncCommute, estimatedMonthlyTakeHome, breakdown, baseHourlyRate, contractualHourlyRate, lunchHourlyImpact, vacationHourlyImpact, commuteHourlyImpact, commuteHoursPerYear, vacationAnnualValue: vacationValue, extraVacationDays: pkg.extraVacationDays, betaltFrokost: pkg.betaltFrokost };
 }
 
 /** Drop rows that are zero across every result, keeping the rest in sync. */

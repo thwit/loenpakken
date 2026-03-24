@@ -28,6 +28,28 @@
   line-height: 1;
 }
 
+.bmcBanner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border-light);
+  font-size: 0.78rem;
+  color: var(--text-3);
+}
+
+.bmcLink {
+  color: var(--brand);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.78rem;
+  transition: opacity 0.15s;
+}
+
+.bmcLink:hover { opacity: 0.75; }
+
 .main {
   flex: 1;
   padding: 2.5rem 2.5rem 4rem;

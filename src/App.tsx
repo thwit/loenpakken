@@ -93,6 +93,12 @@ export default function App() {
           </div>
         </div>
       </header>
+      <div className={styles.bmcBanner}>
+        <span>Var værktøjet en hjælp?</span>
+        <a href="https://buymeacoffee.com/thwit" target="_blank" rel="noopener noreferrer" className={styles.bmcLink}>
+          ☕ Støt med en kop kaffe
+        </a>
+      </div>
       <main className={styles.main}>
         <ComparisonGrid packages={packages} dispatch={dispatch} />
         <section className={styles.resultsSection}>

@@ -16,7 +16,8 @@ export function ResultsPanel({ result, variant, tab, onTabChange, compareResult 
   const isDark = variant === 'dark';
   const panelClass = `${styles.panel} ${isDark ? styles.panelDark : styles.panelLight}`;
 
-  const hasLunch = result.lunchHourlyImpact !== 0; // true when betaltFrokost=true
+  const hasLunch = result.lunchHourlyImpact !== 0;
+  const hasVacationRate = result.vacationHourlyImpact !== 0;
   const hasCommute = result.commuteHourlyImpact !== 0;
 
   function fmtRate(n: number) {
@@ -90,10 +91,16 @@ export function ResultsPanel({ result, variant, tab, onTabChange, compareResult 
                 <span className={styles.wfLabel}>Timesats</span>
                 <span className={styles.wfBase}>{fmtRate(result.baseHourlyRate)}</span>
               </div>
+              {hasVacationRate && (
+                <div className={styles.wfRow}>
+                  <span className={styles.wfLabel}>Ekstra feriedage</span>
+                  <span className={styles.wfPos}>+{fmtRate(result.vacationHourlyImpact)}</span>
+                </div>
+              )}
               {hasLunch && (
                 <div className={styles.wfRow}>
-                  <span className={styles.wfLabel}>Betalt frokostpause</span>
-                  <span className={styles.wfPos}>+{fmtRate(result.lunchHourlyImpact)}</span>
+                  <span className={styles.wfLabel}>Frokostpause (ubetalt)</span>
+                  <span className={styles.wfNeg}>−{fmtRate(result.lunchHourlyImpact)}</span>
                 </div>
               )}
               {hasCommute && (
@@ -102,7 +109,7 @@ export function ResultsPanel({ result, variant, tab, onTabChange, compareResult 
                   <span className={styles.wfNeg}>−{fmtRate(result.commuteHourlyImpact)}</span>
                 </div>
               )}
-              {(hasLunch || hasCommute) && (
+              {(hasLunch || hasVacationRate || hasCommute) && (
                 <div className={`${styles.wfRow} ${styles.wfTotalRow}`}>
                   <span className={styles.wfLabel}>Effektiv timesats</span>
                   <span className={styles.wfTotal}>{fmtRate(result.effectiveHourlyRateIncCommute)}</span>
@@ -142,8 +149,8 @@ export function ResultsPanel({ result, variant, tab, onTabChange, compareResult 
                 <>
                   {hasLunch && (
                     <div className={styles.wfRow}>
-                      <span className={styles.wfLabel}>Betalt frokostpause</span>
-                      <span className={styles.wfPos}>+{fmt(lunchHoursPerYear)}</span>
+                      <span className={styles.wfLabel}>Frokostpause (ubetalt)</span>
+                      <span className={styles.wfNeg}>−{fmt(lunchHoursPerYear)}</span>
                     </div>
                   )}
                   {hasVacation && (
