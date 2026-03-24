@@ -228,7 +228,7 @@ function PackageColumn({ pkg, index, dispatch }: ColumnProps) {
       <button
         className={styles.addBenefitButton}
         onClick={() => dispatch({ type: 'ADD_BENEFIT', id: pkg.id })}
-      >+ Tilføje gode eller tillæg</button>
+      >+ Tilføj gode eller tillæg</button>
     </div>
   );
 }
