@@ -141,8 +141,8 @@ export function ResultsPanel({ result, variant, tab, onTabChange, compareResult 
               const hasAnyRow = hasLunch || hasCommute || hasVacation;
 
               const totalHours =
-                (hasLunch ? lunchHoursPerYear : 0) +
                 (hasVacation ? vacationHoursPerYear : 0) -
+                (hasLunch ? lunchHoursPerYear : 0) -
                 (hasCommute ? commuteHoursAnnual : 0);
 
               return hasAnyRow ? (
