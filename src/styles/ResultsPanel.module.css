@@ -2,7 +2,6 @@
 .panel {
   flex: 1;
   border-radius: var(--radius);
-  overflow: hidden;
   min-width: 280px;
 }
 
@@ -50,8 +49,11 @@
 
 .headerColSub {
   flex: 1;
-  padding: 0.9rem 1.25rem;
+  padding: 0.65rem 1.25rem;
   border-bottom: 1px solid rgba(0,0,0,.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .headerColSub:last-child { border-bottom: none; }
@@ -125,14 +127,116 @@
 .panelLight .headerUnitSub { color: var(--text-3); }
 .panelDark  .headerUnitSub { color: rgba(255,255,255,.5); }
 
+/* ── Smaller yearly netto value ────────────────────────── */
+.headerValueSubSmall {
+  font-family: 'DM Serif Display', serif;
+  font-size: 0.85rem;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  margin-top: 0.2rem;
+}
+
+.panelLight .headerValueSubSmall { color: var(--text-3); }
+.panelDark  .headerValueSubSmall { color: rgba(255,255,255,.5); }
+
+/* ── Tax breakdown tooltip ──────────────────────────────── */
+.tooltipWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.3rem;
+}
+
+.tooltipTrigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.48rem;
+  font-weight: 700;
+  cursor: default;
+  opacity: 0.45;
+}
+
+.panelLight .tooltipTrigger { background: var(--text-3); color: #fff; }
+.panelDark  .tooltipTrigger { background: rgba(255,255,255,.4); color: #000; }
+
+.tooltipBox {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  z-index: 200;
+  min-width: 190px;
+  padding: 0.55rem 0.7rem;
+  border-radius: 6px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.13), 0 1px 4px rgba(0,0,0,.08);
+  flex-direction: column;
+  gap: 0.2rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.tooltipBox {
+  background: #1e2a32;
+  color: rgba(255,255,255,.85);
+}
+
+.tooltipWrapper:hover .tooltipBox {
+  display: flex;
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.25rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,.7);
+}
+
+.tooltipRow span:last-child {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,.9);
+}
+
+.tooltipFradrag {
+  color: rgba(255,255,255,.45) !important;
+  font-size: 0.68rem !important;
+}
+
+.tooltipFradrag span:last-child {
+  color: rgba(255,255,255,.55) !important;
+}
+
+.tooltipTotal {
+  margin-top: 0.25rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid rgba(255,255,255,.12);
+  font-weight: 600;
+  color: rgba(255,255,255,.95);
+}
+
+.tooltipTotal span:last-child {
+  color: #ffffff;
+}
+
+/* ── Value + badge inline row ───────────────────────────── */
+.headerValueSubRow {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
 /* ── Percentage diff badges ────────────────────────────── */
 .diffPos, .diffNeg {
-  display: inline-block;
-  align-self: flex-start;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
-  margin-top: 0.4rem;
 }
 
 .panelLight .diffPos { color: var(--positive); }

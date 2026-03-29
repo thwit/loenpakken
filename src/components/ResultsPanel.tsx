@@ -1,5 +1,6 @@
 import type { CalculationResult } from '../types';
 import { WEEKS_PER_YEAR } from '../constants';
+import { formatDKK } from '../calculations';
 import styles from '../styles/ResultsPanel.module.css';
 
 export type Tab = 'timesats' | 'månedligt' | 'årligt';
@@ -46,11 +47,13 @@ export function ResultsPanel({ result, variant, tab, onTabChange, compareResult 
         <div className={styles.headerColStack}>
           <div className={styles.headerColSub}>
             <div className={styles.headerLabelSub}>Timesats</div>
-            <div className={styles.headerValueSub}>
-              {Math.round(result.contractualHourlyRate).toLocaleString('da-DK')}
-              <span className={styles.headerUnitSub}>kr/t</span>
+            <div className={styles.headerValueSubRow}>
+              <div className={styles.headerValueSub}>
+                {Math.round(result.contractualHourlyRate).toLocaleString('da-DK')}
+                <span className={styles.headerUnitSub}>kr/t</span>
+              </div>
+              {pctDiff(result.contractualHourlyRate, compareResult?.contractualHourlyRate ?? 0)}
             </div>
-            {pctDiff(result.contractualHourlyRate, compareResult?.contractualHourlyRate ?? 0)}
           </div>
           <div className={styles.headerColSub}>
             <div className={styles.headerLabelSub}>Månedligt total</div>
@@ -64,6 +67,65 @@ export function ResultsPanel({ result, variant, tab, onTabChange, compareResult 
             <div className={styles.headerValueSub}>
               {Math.round(result.totalAnnualComp).toLocaleString('da-DK')}
               <span className={styles.headerUnitSub}>kr/år</span>
+            </div>
+          </div>
+          <div className={styles.headerColSub}>
+            <div className={styles.headerLabelSub}>
+              Netto udbetalt
+              <span className={styles.tooltipWrapper}>
+                <span className={styles.tooltipTrigger}>?</span>
+                <span className={styles.tooltipBox}>
+                  <span className={styles.tooltipRow}>
+                    <span>AM-bidrag</span>
+                    <span>{formatDKK(result.taxBreakdown.amBidrag / 12)}</span>
+                  </span>
+                  <span className={`${styles.tooltipRow} ${styles.tooltipFradrag}`}>
+                    <span>– Beskæftigelsesfradrag</span>
+                    <span>{formatDKK(result.taxBreakdown.beskæftigelsesfradrag / 12)}</span>
+                  </span>
+                  <span className={`${styles.tooltipRow} ${styles.tooltipFradrag}`}>
+                    <span>– Personfradrag</span>
+                    <span>{formatDKK(result.taxBreakdown.personfradrag / 12)}</span>
+                  </span>
+                  <span className={styles.tooltipRow}>
+                    <span>Bundskat</span>
+                    <span>{formatDKK(result.taxBreakdown.bundskat / 12)}</span>
+                  </span>
+                  <span className={styles.tooltipRow}>
+                    <span>Kommuneskat</span>
+                    <span>{formatDKK(result.taxBreakdown.kommuneskat / 12)}</span>
+                  </span>
+                  {result.taxBreakdown.mellemskat > 0 && (
+                    <span className={styles.tooltipRow}>
+                      <span>Mellemskat</span>
+                      <span>{formatDKK(result.taxBreakdown.mellemskat / 12)}</span>
+                    </span>
+                  )}
+                  {result.taxBreakdown.topskat > 0 && (
+                    <span className={styles.tooltipRow}>
+                      <span>Topskat</span>
+                      <span>{formatDKK(result.taxBreakdown.topskat / 12)}</span>
+                    </span>
+                  )}
+                  {result.taxBreakdown.toptopskat > 0 && (
+                    <span className={styles.tooltipRow}>
+                      <span>Toptopskat</span>
+                      <span>{formatDKK(result.taxBreakdown.toptopskat / 12)}</span>
+                    </span>
+                  )}
+                  <span className={`${styles.tooltipRow} ${styles.tooltipTotal}`}>
+                    <span>Total skat</span>
+                    <span>{formatDKK(result.taxBreakdown.total / 12)}</span>
+                  </span>
+                </span>
+              </span>
+            </div>
+            <div className={styles.headerValueSubRow}>
+              <div className={styles.headerValueSub}>
+                {Math.round(result.estimatedMonthlyTakeHome).toLocaleString('da-DK')}
+                <span className={styles.headerUnitSub}>kr/md.</span>
+              </div>
+              {pctDiff(result.estimatedMonthlyTakeHome, compareResult?.estimatedMonthlyTakeHome ?? 0)}
             </div>
           </div>
         </div>

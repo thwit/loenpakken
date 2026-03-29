@@ -25,6 +25,18 @@ export interface Package {
   benefits: CustomBenefit[];
 }
 
+export interface TaxBreakdown {
+  amBidrag: number;
+  beskæftigelsesfradrag: number;
+  personfradrag: number;
+  bundskat: number;
+  kommuneskat: number;
+  mellemskat: number;
+  topskat: number;
+  toptopskat: number;
+  total: number;
+}
+
 export interface BreakdownItem {
   label: string;
   monthlyDKK: number;
@@ -35,6 +47,8 @@ export interface CalculationResult {
   effectiveHourlyRateExCommute: number;
   effectiveHourlyRateIncCommute: number;
   estimatedMonthlyTakeHome: number;
+  annualTakeHome: number;
+  taxBreakdown: TaxBreakdown;
   breakdown: BreakdownItem[];
   baseHourlyRate: number;
   contractualHourlyRate: number;

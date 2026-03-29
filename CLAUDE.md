@@ -24,7 +24,7 @@ State is persisted entirely in the URL hash (base64-encoded JSON), enabling shar
 | File | Role |
 |---|---|
 | `src/App.tsx` | Root component; owns all package state via `useReducer` |
-| `src/types.ts` | Core interfaces: `Package`, `CalculationResult`, `BenefitField` |
+| `src/types.ts` | Core interfaces: `Package`, `CalculationResult`, `CustomBenefit` |
 | `src/constants.ts` | Package color palette (`--c0`–`--c3`), default values, `createPackage()` factory |
 | `src/calculations.ts` | Pure functions computing total comp, hourly rates, breakdown line items |
 | `src/urlState.ts` | Encode/decode state to/from URL hash (base64 + JSON) |
@@ -36,7 +36,6 @@ App.tsx (useReducer)
 └── ComparisonGrid       — outer grid layout + section headers
     ├── PackageHeader    — editable package name + remove button
     ├── InputRow         — labeled numeric input (salary, hours, etc.)
-    ├── BenefitRow       — checkbox + optional numeric value (health, food, phone/car)
     ├── ResultsPanel     — computed results: annual comp, hourly rates, monthly take-home, breakdown table
     └── GrowthChart      — 8-year projection table with adjustable annual raise % slider
 ShareButton              — copies shareable URL to clipboard
@@ -61,9 +60,9 @@ Package columns are identified by a `data-package-index` attribute on the column
 ### Data model
 
 `Package` fields of note:
-- **Salary:** `monthlySalary`, `pensionPct`, `ownPensionPct`, `yearlyBonus`, `ferietillaegPct`
-- **Work conditions:** `weeklyHours`, `commuteMinutesPerDay`, `monthlyCommuteCost`, `remoteDaysPerWeek`
-- **Benefits:** `healthInsurance`, `freeFood`, `phoneComputerCar` (each: `{ enabled: boolean; monthlyValue: number }`)
+- **Salary:** `monthlySalary`, `pensionPct`, `ownPensionPct`, `yearlyBonus`, `ferietillaegPct`, `fritvalgPct`
+- **Work conditions:** `weeklyHours`, `betaltFrokost` (boolean), `commuteMinutesPerDay`, `monthlyCommuteCost`, `remoteDaysPerWeek`
+- **Benefits:** `benefits: CustomBenefit[]` — each has `{ id, label, valuePerMonth }`; user-defined, no fixed set
 - **Extra:** `extraVacationDays`, `id` (UUID), `name`
 
 Tax rate is hardcoded at 35% for estimated monthly take-home.

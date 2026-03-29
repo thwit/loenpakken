@@ -1,5 +1,50 @@
-import type { Package, CalculationResult, BreakdownItem } from './types';
+import type { Package, CalculationResult, BreakdownItem, TaxBreakdown } from './types';
 import { WORKING_DAYS_PER_YEAR, WEEKS_PER_YEAR } from './constants';
+
+// 2026 – Københavns Kommune – no kirkeskat
+const AM_BIDRAG_RATE = 0.08;
+const PERSONFRADRAG = 54_100;
+const BESKÆFTIGELSESFRADRAG_RATE = 0.1275;
+const BESKÆFTIGELSESFRADRAG_MAX = 63_300;
+const BUNDSKAT_RATE = 0.1201;
+const KOMMUNESKAT_RATE = 0.2339;
+const MELLEMSKAT_RATE = 0.075;
+const MELLEMSKAT_THRESHOLD = 641_200;
+const TOPSKAT_RATE = 0.075;
+const TOPSKAT_THRESHOLD = 777_900;
+const TOPTOPSKAT_RATE = 0.05;
+const TOPTOPSKAT_THRESHOLD = 2_592_700;
+// Skatteloft: combined rate of bundskat+kommuneskat+top taxes cannot exceed 44.57%.
+// When stacked top taxes push the rate over the ceiling, bundskat is reduced by the excess.
+// Mellemskat band:    12.01+23.39+7.5        = 42.90% → under ceiling, no correction
+// Topskat band:       12.01+23.39+7.5+7.5    = 50.40% → excess 5.83%
+// Toptopskat band:    12.01+23.39+7.5+7.5+5  = 55.40% → excess 10.83%
+const SKATTELOFT = 0.4457;
+const TOPSKAT_EXCESS    = Math.max(0, BUNDSKAT_RATE + KOMMUNESKAT_RATE + MELLEMSKAT_RATE + TOPSKAT_RATE - SKATTELOFT);
+const TOPTOPSKAT_EXCESS = Math.max(0, BUNDSKAT_RATE + KOMMUNESKAT_RATE + MELLEMSKAT_RATE + TOPSKAT_RATE + TOPTOPSKAT_RATE - SKATTELOFT);
+
+function calculateDanishTax(annualGross: number): TaxBreakdown {
+  const amBidrag = annualGross * AM_BIDRAG_RATE;
+  const personligIndkomst = annualGross - amBidrag;
+  const beskæftigelsesfradrag = Math.min(annualGross * BESKÆFTIGELSESFRADRAG_RATE, BESKÆFTIGELSESFRADRAG_MAX);
+  const skattepligtig = Math.max(personligIndkomst - beskæftigelsesfradrag - PERSONFRADRAG, 0);
+
+  const bundskatRaw = skattepligtig * BUNDSKAT_RATE;
+  const kommuneskat = skattepligtig * KOMMUNESKAT_RATE;
+  const mellemskat = Math.max(personligIndkomst - MELLEMSKAT_THRESHOLD, 0) * MELLEMSKAT_RATE;
+  const topskat    = Math.max(personligIndkomst - TOPSKAT_THRESHOLD, 0) * TOPSKAT_RATE;
+  const toptopskat = Math.max(personligIndkomst - TOPTOPSKAT_THRESHOLD, 0) * TOPTOPSKAT_RATE;
+
+  // Skatteloft nedslag: reduce bundskat for income in topskat/toptopskat bands
+  const topskatIncome    = Math.max(personligIndkomst - TOPSKAT_THRESHOLD, 0)
+                         - Math.max(personligIndkomst - TOPTOPSKAT_THRESHOLD, 0);
+  const toptopskatIncome = Math.max(personligIndkomst - TOPTOPSKAT_THRESHOLD, 0);
+  const nedslag = topskatIncome * TOPSKAT_EXCESS + toptopskatIncome * TOPTOPSKAT_EXCESS;
+
+  const bundskat = Math.max(bundskatRaw - nedslag, 0);
+  const total = amBidrag + bundskat + kommuneskat + mellemskat + topskat + toptopskat;
+  return { amBidrag, beskæftigelsesfradrag, personfradrag: PERSONFRADRAG, bundskat, kommuneskat, mellemskat, topskat, toptopskat, total };
+}
 
 export const dkkFormatter = new Intl.NumberFormat('da-DK', {
   style: 'currency',
@@ -50,7 +95,11 @@ export function calculate(pkg: Package): CalculationResult {
 
   const effectiveHourlyRateExCommute = workHoursPerYear === 0 ? 0 : totalAnnualComp / workHoursPerYear;
   const effectiveHourlyRateIncCommute = (workHoursPerYear + commuteHoursPerYear) === 0 ? 0 : totalAnnualComp / (workHoursPerYear + commuteHoursPerYear);
-  const estimatedMonthlyTakeHome = (pkg.monthlySalary - monthlyOwnPension) * 0.65;
+  const annualOwnPension = monthlyOwnPension * 12;
+  const taxableAnnual = annualSalary - annualOwnPension + ferietillaeg + fritvalgAnnual + pkg.yearlyBonus;
+  const taxBreakdown = calculateDanishTax(Math.max(taxableAnnual, 0));
+  const annualTakeHome = Math.max(taxableAnnual - taxBreakdown.total, 0);
+  const estimatedMonthlyTakeHome = annualTakeHome / 12;
 
   // All items always included in fixed order — normalization happens in normalizeBreakdowns()
   const breakdown: BreakdownItem[] = [
@@ -78,7 +127,7 @@ export function calculate(pkg: Package): CalculationResult {
   const commuteHourlyImpact = commuteHoursPerYear > 0 ? effectiveHourlyRateIncCommute - effectiveHourlyRateExCommute : 0;
   const baseHourlyRate = contractualHourlyRate;
 
-  return { totalAnnualComp, effectiveHourlyRateExCommute, effectiveHourlyRateIncCommute, estimatedMonthlyTakeHome, breakdown, baseHourlyRate, contractualHourlyRate, lunchHourlyImpact, vacationHourlyImpact, commuteHourlyImpact, commuteHoursPerYear, vacationAnnualValue: vacationValue, extraVacationDays: pkg.extraVacationDays, betaltFrokost: pkg.betaltFrokost };
+  return { totalAnnualComp, effectiveHourlyRateExCommute, effectiveHourlyRateIncCommute, estimatedMonthlyTakeHome, annualTakeHome, taxBreakdown, breakdown, baseHourlyRate, contractualHourlyRate, lunchHourlyImpact, vacationHourlyImpact, commuteHourlyImpact, commuteHoursPerYear, vacationAnnualValue: vacationValue, extraVacationDays: pkg.extraVacationDays, betaltFrokost: pkg.betaltFrokost };
 }
 
 /** Drop rows that are zero across every result, keeping the rest in sync. */
