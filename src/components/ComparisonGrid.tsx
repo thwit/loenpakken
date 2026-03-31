@@ -217,13 +217,13 @@ function PackageColumn({ pkg, index, dispatch }: ColumnProps) {
             />
             <span className={styles.suffix}>kr/md.</span>
           </div>
-          <div className={styles.benefitTaxToggle}>
+          <div className={styles.taxPill}>
             <button
-              className={`${styles.benefitTaxBtn} ${!b.postTax ? styles.benefitTaxBtnActive : ''}`}
+              className={`${styles.taxPillBtn} ${!b.postTax ? styles.taxPillBtnActive : ''}`}
               onClick={() => dispatch({ type: 'UPDATE_BENEFIT', id: pkg.id, benefitId: b.id, key: 'postTax', value: false })}
             >Før skat</button>
             <button
-              className={`${styles.benefitTaxBtn} ${b.postTax ? styles.benefitTaxBtnActive : ''}`}
+              className={`${styles.taxPillBtn} ${b.postTax ? styles.taxPillBtnActive : ''}`}
               onClick={() => dispatch({ type: 'UPDATE_BENEFIT', id: pkg.id, benefitId: b.id, key: 'postTax', value: true })}
             >Efter skat</button>
           </div>
