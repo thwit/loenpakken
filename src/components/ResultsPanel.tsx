@@ -37,7 +37,17 @@ export function ResultsPanel({ result, variant, tab, onTabChange, compareResult 
       {/* HEADER: main focus + stacked secondary */}
       <div className={styles.headerCols}>
         <div className={styles.headerColMain}>
-          <div className={styles.headerLabel}>Effektiv timesats</div>
+          <div className={styles.headerLabel}>
+            Effektiv timesats
+            <span className={styles.tooltipWrapper}>
+              <span className={styles.tooltipTrigger}>?</span>
+              <span className={`${styles.tooltipBox} ${styles.tooltipBoxLeft}`}>
+                <span className={styles.tooltipText}>
+                  Den effektive timesats afspejler det samlede tidsforbrug, du binder dig til ved at tage jobbet — inkl. pendlingstid og betalte pauser. Det er hvad din tid reelt er værd pr. time, du er væk hjemmefra.
+                </span>
+              </span>
+            </span>
+          </div>
           <div className={styles.headerValue}>
             {Math.round(result.effectiveHourlyRateIncCommute).toLocaleString('da-DK')}
             <span className={styles.headerUnit}>kr/t</span>
