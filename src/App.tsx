@@ -4,14 +4,14 @@ import { createDefaultPackage } from './constants';
 import { encodeState, decodeState } from './urlState';
 import { calculate, normalizeBreakdowns } from './calculations';
 import { ComparisonGrid } from './components/ComparisonGrid';
-import { ResultsPanel, type Tab } from './components/ResultsPanel';
+import { ResultsPanel, type Tab, type SummaryMode } from './components/ResultsPanel';
 import { ShareButton } from './components/ShareButton';
 import styles from './App.module.css';
 
 type Action =
   | { type: 'UPDATE_FIELD'; id: string; field: keyof Package; value: unknown }
   | { type: 'ADD_BENEFIT'; id: string }
-  | { type: 'UPDATE_BENEFIT'; id: string; benefitId: string; key: 'label' | 'valuePerMonth'; value: unknown }
+  | { type: 'UPDATE_BENEFIT'; id: string; benefitId: string; key: 'label' | 'valuePerMonth' | 'postTax'; value: unknown }
   | { type: 'REMOVE_BENEFIT'; id: string; benefitId: string }
   | { type: 'LOAD_STATE'; packages: Package[] };
 
@@ -29,7 +29,7 @@ function reducer(state: Package[], action: Action): Package[] {
     case 'ADD_BENEFIT':
       return state.map(p => {
         if (p.id !== action.id) return p;
-        return { ...p, benefits: [...p.benefits, { id: crypto.randomUUID(), label: '', valuePerMonth: 0 }] };
+        return { ...p, benefits: [...p.benefits, { id: crypto.randomUUID(), label: '', valuePerMonth: 0, postTax: false }] };
       });
     case 'UPDATE_BENEFIT':
       return state.map(p => {
@@ -70,6 +70,7 @@ export default function App() {
   }, [packages]);
 
   const [tab, setTab] = useState<Tab>('timesats');
+  const [summaryMode, setSummaryMode] = useState<SummaryMode>('gross');
   const [darkMode, setDarkMode] = useState(false);
 
   const rawResults = packages.map(pkg => calculate(pkg));
@@ -111,6 +112,8 @@ export default function App() {
                 variant={i === 1 ? 'dark' : 'light'}
                 tab={tab}
                 onTabChange={setTab}
+                summaryMode={summaryMode}
+                onSummaryModeChange={setSummaryMode}
                 compareResult={i === 1 ? results[0] : undefined}
               />
             ))}

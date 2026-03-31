@@ -64,7 +64,8 @@ export function calculate(pkg: Package): CalculationResult {
   const ferietillaeg = annualSalary * pkg.ferietillaegPct / 100;
   const fritvalgAnnual = annualSalary * pkg.fritvalgPct / 100;
 
-  const benefitsAnnual = pkg.benefits.reduce((sum, b) => sum + b.valuePerMonth * 12, 0);
+  const preTaxBenefitsAnnual  = pkg.benefits.filter(b => !b.postTax).reduce((sum, b) => sum + b.valuePerMonth * 12, 0);
+  const postTaxAdjustmentAnnual = pkg.benefits.filter(b => b.postTax).reduce((sum, b) => sum + b.valuePerMonth * 12, 0);
 
   const vacationValue =
     WORKING_DAYS_PER_YEAR > 0
@@ -83,8 +84,7 @@ export function calculate(pkg: Package): CalculationResult {
     ferietillaeg +
     fritvalgAnnual +
     pkg.yearlyBonus +
-    benefitsAnnual -
-    annualCommuteCost;
+    preTaxBenefitsAnnual;
 
   const commuteDaysPerYear = commuteDaysPerWeek * WEEKS_PER_YEAR;
   const commuteHoursPerYear = commuteDaysPerYear * (pkg.commuteMinutesPerDay / 60);
@@ -96,9 +96,9 @@ export function calculate(pkg: Package): CalculationResult {
   const effectiveHourlyRateExCommute = workHoursPerYear === 0 ? 0 : totalAnnualComp / workHoursPerYear;
   const effectiveHourlyRateIncCommute = (workHoursPerYear + commuteHoursPerYear) === 0 ? 0 : totalAnnualComp / (workHoursPerYear + commuteHoursPerYear);
   const annualOwnPension = monthlyOwnPension * 12;
-  const taxableAnnual = annualSalary - annualOwnPension + ferietillaeg + fritvalgAnnual + pkg.yearlyBonus;
+  const taxableAnnual = annualSalary - annualOwnPension + ferietillaeg + fritvalgAnnual + pkg.yearlyBonus + preTaxBenefitsAnnual;
   const taxBreakdown = calculateDanishTax(Math.max(taxableAnnual, 0));
-  const annualTakeHome = Math.max(taxableAnnual - taxBreakdown.total, 0);
+  const annualTakeHome = Math.max(taxableAnnual - taxBreakdown.total + postTaxAdjustmentAnnual - annualCommuteCost, 0);
   const estimatedMonthlyTakeHome = annualTakeHome / 12;
 
   // All items always included in fixed order — normalization happens in normalizeBreakdowns()
@@ -109,7 +109,7 @@ export function calculate(pkg: Package): CalculationResult {
     { label: 'Bonus', monthlyDKK: pkg.yearlyBonus / 12 },
     { label: pkg.ferietillaegPct > 0 ? `Ferietillæg (${pkg.ferietillaegPct}%)` : 'Ferietillæg', monthlyDKK: ferietillaeg / 12 },
     { label: pkg.fritvalgPct > 0 ? `Fritvalgskonto (${pkg.fritvalgPct}%)` : 'Fritvalgskonto', monthlyDKK: fritvalgAnnual / 12 },
-    ...pkg.benefits.map(b => ({ label: b.label || 'Gode', monthlyDKK: b.valuePerMonth })),
+    ...pkg.benefits.map(b => ({ label: b.label || (b.valuePerMonth < 0 ? 'Udgift' : 'Gode'), monthlyDKK: b.valuePerMonth })),
     { label: 'Pendling', monthlyDKK: -effectiveMonthlyCommuteCost },
   ];
 
@@ -127,7 +127,14 @@ export function calculate(pkg: Package): CalculationResult {
   const commuteHourlyImpact = commuteHoursPerYear > 0 ? effectiveHourlyRateIncCommute - effectiveHourlyRateExCommute : 0;
   const baseHourlyRate = contractualHourlyRate;
 
-  return { totalAnnualComp, effectiveHourlyRateExCommute, effectiveHourlyRateIncCommute, estimatedMonthlyTakeHome, annualTakeHome, taxBreakdown, breakdown, baseHourlyRate, contractualHourlyRate, lunchHourlyImpact, vacationHourlyImpact, commuteHourlyImpact, commuteHoursPerYear, vacationAnnualValue: vacationValue, extraVacationDays: pkg.extraVacationDays, betaltFrokost: pkg.betaltFrokost };
+  // Net rates: commute already deducted in annualTakeHome
+  const netAnnualAfterExpenses = annualTakeHome;
+  const netMonthlyAfterExpenses = netAnnualAfterExpenses / 12;
+  const netContractualHourlyRate = pkg.weeklyHours > 0 ? netAnnualAfterExpenses / (pkg.weeklyHours * WEEKS_PER_YEAR) : 0;
+  const netEffectiveHourlyRateExCommute = workHoursPerYear > 0 ? netAnnualAfterExpenses / workHoursPerYear : 0;
+  const netEffectiveHourlyRateIncCommute = (workHoursPerYear + commuteHoursPerYear) > 0 ? netAnnualAfterExpenses / (workHoursPerYear + commuteHoursPerYear) : 0;
+
+  return { totalAnnualComp, effectiveHourlyRateExCommute, effectiveHourlyRateIncCommute, estimatedMonthlyTakeHome, annualTakeHome, netMonthlyAfterExpenses, netContractualHourlyRate, netEffectiveHourlyRateExCommute, netEffectiveHourlyRateIncCommute, taxBreakdown, breakdown, baseHourlyRate, contractualHourlyRate, lunchHourlyImpact, vacationHourlyImpact, commuteHourlyImpact, commuteHoursPerYear, vacationAnnualValue: vacationValue, extraVacationDays: pkg.extraVacationDays, betaltFrokost: pkg.betaltFrokost };
 }
 
 /** Drop rows that are zero across every result, keeping the rest in sync. */

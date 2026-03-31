@@ -5,7 +5,7 @@ import styles from '../styles/ComparisonGrid.module.css';
 type Action =
   | { type: 'UPDATE_FIELD'; id: string; field: keyof Package; value: unknown }
   | { type: 'ADD_BENEFIT'; id: string }
-  | { type: 'UPDATE_BENEFIT'; id: string; benefitId: string; key: 'label' | 'valuePerMonth'; value: unknown }
+  | { type: 'UPDATE_BENEFIT'; id: string; benefitId: string; key: 'label' | 'valuePerMonth' | 'postTax'; value: unknown }
   | { type: 'REMOVE_BENEFIT'; id: string; benefitId: string }
   | { type: 'LOAD_STATE'; packages: Package[] };
 
@@ -204,7 +204,7 @@ function PackageColumn({ pkg, index, dispatch }: ColumnProps) {
             className={styles.benefitLabelInput}
             type="text"
             value={b.label}
-            placeholder="Navn på gode eller tillæg"
+            placeholder="Navn på gode, tillæg eller udgift"
             onChange={e => dispatch({ type: 'UPDATE_BENEFIT', id: pkg.id, benefitId: b.id, key: 'label', value: e.target.value })}
           />
           <div className={styles.inputGroup}>
@@ -217,6 +217,16 @@ function PackageColumn({ pkg, index, dispatch }: ColumnProps) {
             />
             <span className={styles.suffix}>kr/md.</span>
           </div>
+          <div className={styles.benefitTaxToggle}>
+            <button
+              className={`${styles.benefitTaxBtn} ${!b.postTax ? styles.benefitTaxBtnActive : ''}`}
+              onClick={() => dispatch({ type: 'UPDATE_BENEFIT', id: pkg.id, benefitId: b.id, key: 'postTax', value: false })}
+            >Før skat</button>
+            <button
+              className={`${styles.benefitTaxBtn} ${b.postTax ? styles.benefitTaxBtnActive : ''}`}
+              onClick={() => dispatch({ type: 'UPDATE_BENEFIT', id: pkg.id, benefitId: b.id, key: 'postTax', value: true })}
+            >Efter skat</button>
+          </div>
           <button
             className={styles.removeBenefitButton}
             onClick={() => dispatch({ type: 'REMOVE_BENEFIT', id: pkg.id, benefitId: b.id })}
@@ -228,7 +238,7 @@ function PackageColumn({ pkg, index, dispatch }: ColumnProps) {
       <button
         className={styles.addBenefitButton}
         onClick={() => dispatch({ type: 'ADD_BENEFIT', id: pkg.id })}
-      >+ Tilføj gode eller tillæg</button>
+      >+ Tilføj gode, tillæg eller udgift</button>
     </div>
   );
 }

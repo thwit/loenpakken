@@ -4,16 +4,19 @@ import { formatDKK } from '../calculations';
 import styles from '../styles/ResultsPanel.module.css';
 
 export type Tab = 'timesats' | 'månedligt' | 'årligt';
+export type SummaryMode = 'gross' | 'net';
 
 interface Props {
   result: CalculationResult;
   variant: 'light' | 'dark';
   tab: Tab;
   onTabChange: (tab: Tab) => void;
+  summaryMode: SummaryMode;
+  onSummaryModeChange: (mode: SummaryMode) => void;
   compareResult?: CalculationResult;
 }
 
-export function ResultsPanel({ result, variant, tab, onTabChange, compareResult }: Props) {
+export function ResultsPanel({ result, variant, tab, onTabChange, summaryMode, onSummaryModeChange, compareResult }: Props) {
   const isDark = variant === 'dark';
   const panelClass = `${styles.panel} ${isDark ? styles.panelDark : styles.panelLight}`;
 
@@ -34,6 +37,18 @@ export function ResultsPanel({ result, variant, tab, onTabChange, compareResult 
   }
   return (
     <div className={panelClass}>
+      {/* MODE TOGGLE */}
+      <div className={styles.modeToggle}>
+        <button
+          className={`${styles.modeBtn} ${summaryMode === 'gross' ? styles.modeBtnActive : ''}`}
+          onClick={() => onSummaryModeChange('gross')}
+        >Før skat</button>
+        <button
+          className={`${styles.modeBtn} ${summaryMode === 'net' ? styles.modeBtnActive : ''}`}
+          onClick={() => onSummaryModeChange('net')}
+        >Efter skat &amp; udgifter</button>
+      </div>
+
       {/* HEADER: main focus + stacked secondary */}
       <div className={styles.headerCols}>
         <div className={styles.headerColMain}>
@@ -49,93 +64,110 @@ export function ResultsPanel({ result, variant, tab, onTabChange, compareResult 
             </span>
           </div>
           <div className={styles.headerValue}>
-            {Math.round(result.effectiveHourlyRateIncCommute).toLocaleString('da-DK')}
+            {summaryMode === 'gross'
+              ? Math.round(result.effectiveHourlyRateIncCommute).toLocaleString('da-DK')
+              : Math.round(result.netEffectiveHourlyRateIncCommute).toLocaleString('da-DK')}
             <span className={styles.headerUnit}>kr/t</span>
           </div>
-          {pctDiff(result.effectiveHourlyRateIncCommute, compareResult?.effectiveHourlyRateIncCommute ?? 0)}
+          {summaryMode === 'gross'
+            ? pctDiff(result.effectiveHourlyRateIncCommute, compareResult?.effectiveHourlyRateIncCommute ?? 0)
+            : pctDiff(result.netEffectiveHourlyRateIncCommute, compareResult?.netEffectiveHourlyRateIncCommute ?? 0)}
         </div>
         <div className={styles.headerColStack}>
           <div className={styles.headerColSub}>
             <div className={styles.headerLabelSub}>Timesats</div>
             <div className={styles.headerValueSubRow}>
               <div className={styles.headerValueSub}>
-                {Math.round(result.contractualHourlyRate).toLocaleString('da-DK')}
+                {summaryMode === 'gross'
+                  ? Math.round(result.contractualHourlyRate).toLocaleString('da-DK')
+                  : Math.round(result.netContractualHourlyRate).toLocaleString('da-DK')}
                 <span className={styles.headerUnitSub}>kr/t</span>
               </div>
-              {pctDiff(result.contractualHourlyRate, compareResult?.contractualHourlyRate ?? 0)}
+              {summaryMode === 'gross'
+                ? pctDiff(result.contractualHourlyRate, compareResult?.contractualHourlyRate ?? 0)
+                : pctDiff(result.netContractualHourlyRate, compareResult?.netContractualHourlyRate ?? 0)}
             </div>
           </div>
           <div className={styles.headerColSub}>
-            <div className={styles.headerLabelSub}>Månedligt total</div>
-            <div className={styles.headerValueSub}>
-              {Math.round(result.totalAnnualComp / 12).toLocaleString('da-DK')}
-              <span className={styles.headerUnitSub}>kr/md.</span>
-            </div>
-          </div>
-          <div className={styles.headerColSub}>
-            <div className={styles.headerLabelSub}>Årligt total</div>
-            <div className={styles.headerValueSub}>
-              {Math.round(result.totalAnnualComp).toLocaleString('da-DK')}
-              <span className={styles.headerUnitSub}>kr/år</span>
-            </div>
+            {summaryMode === 'gross' ? (
+              <>
+                <div className={styles.headerLabelSub}>Månedligt total</div>
+                <div className={styles.headerValueSub}>
+                  {Math.round(result.totalAnnualComp / 12).toLocaleString('da-DK')}
+                  <span className={styles.headerUnitSub}>kr/md.</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={styles.headerLabelSub}>
+                  Netto udbetalt
+                  <span className={styles.tooltipWrapper}>
+                    <span className={styles.tooltipTrigger}>?</span>
+                    <span className={styles.tooltipBox}>
+                      <span className={styles.tooltipRow}>
+                        <span>AM-bidrag</span>
+                        <span>{formatDKK(result.taxBreakdown.amBidrag / 12)}</span>
+                      </span>
+                      <span className={`${styles.tooltipRow} ${styles.tooltipFradrag}`}>
+                        <span>– Beskæftigelsesfradrag</span>
+                        <span>{formatDKK(result.taxBreakdown.beskæftigelsesfradrag / 12)}</span>
+                      </span>
+                      <span className={`${styles.tooltipRow} ${styles.tooltipFradrag}`}>
+                        <span>– Personfradrag</span>
+                        <span>{formatDKK(result.taxBreakdown.personfradrag / 12)}</span>
+                      </span>
+                      <span className={styles.tooltipRow}>
+                        <span>Bundskat</span>
+                        <span>{formatDKK(result.taxBreakdown.bundskat / 12)}</span>
+                      </span>
+                      <span className={styles.tooltipRow}>
+                        <span>Kommuneskat</span>
+                        <span>{formatDKK(result.taxBreakdown.kommuneskat / 12)}</span>
+                      </span>
+                      {result.taxBreakdown.mellemskat > 0 && (
+                        <span className={styles.tooltipRow}>
+                          <span>Mellemskat</span>
+                          <span>{formatDKK(result.taxBreakdown.mellemskat / 12)}</span>
+                        </span>
+                      )}
+                      {result.taxBreakdown.topskat > 0 && (
+                        <span className={styles.tooltipRow}>
+                          <span>Topskat</span>
+                          <span>{formatDKK(result.taxBreakdown.topskat / 12)}</span>
+                        </span>
+                      )}
+                      {result.taxBreakdown.toptopskat > 0 && (
+                        <span className={styles.tooltipRow}>
+                          <span>Toptopskat</span>
+                          <span>{formatDKK(result.taxBreakdown.toptopskat / 12)}</span>
+                        </span>
+                      )}
+                      <span className={`${styles.tooltipRow} ${styles.tooltipTotal}`}>
+                        <span>Total skat</span>
+                        <span>{formatDKK(result.taxBreakdown.total / 12)}</span>
+                      </span>
+                    </span>
+                  </span>
+                </div>
+                <div className={styles.headerValueSubRow}>
+                  <div className={styles.headerValueSub}>
+                    {Math.round(result.estimatedMonthlyTakeHome).toLocaleString('da-DK')}
+                    <span className={styles.headerUnitSub}>kr/md.</span>
+                  </div>
+                  {pctDiff(result.estimatedMonthlyTakeHome, compareResult?.estimatedMonthlyTakeHome ?? 0)}
+                </div>
+              </>
+            )}
           </div>
           <div className={styles.headerColSub}>
             <div className={styles.headerLabelSub}>
-              Netto udbetalt
-              <span className={styles.tooltipWrapper}>
-                <span className={styles.tooltipTrigger}>?</span>
-                <span className={styles.tooltipBox}>
-                  <span className={styles.tooltipRow}>
-                    <span>AM-bidrag</span>
-                    <span>{formatDKK(result.taxBreakdown.amBidrag / 12)}</span>
-                  </span>
-                  <span className={`${styles.tooltipRow} ${styles.tooltipFradrag}`}>
-                    <span>– Beskæftigelsesfradrag</span>
-                    <span>{formatDKK(result.taxBreakdown.beskæftigelsesfradrag / 12)}</span>
-                  </span>
-                  <span className={`${styles.tooltipRow} ${styles.tooltipFradrag}`}>
-                    <span>– Personfradrag</span>
-                    <span>{formatDKK(result.taxBreakdown.personfradrag / 12)}</span>
-                  </span>
-                  <span className={styles.tooltipRow}>
-                    <span>Bundskat</span>
-                    <span>{formatDKK(result.taxBreakdown.bundskat / 12)}</span>
-                  </span>
-                  <span className={styles.tooltipRow}>
-                    <span>Kommuneskat</span>
-                    <span>{formatDKK(result.taxBreakdown.kommuneskat / 12)}</span>
-                  </span>
-                  {result.taxBreakdown.mellemskat > 0 && (
-                    <span className={styles.tooltipRow}>
-                      <span>Mellemskat</span>
-                      <span>{formatDKK(result.taxBreakdown.mellemskat / 12)}</span>
-                    </span>
-                  )}
-                  {result.taxBreakdown.topskat > 0 && (
-                    <span className={styles.tooltipRow}>
-                      <span>Topskat</span>
-                      <span>{formatDKK(result.taxBreakdown.topskat / 12)}</span>
-                    </span>
-                  )}
-                  {result.taxBreakdown.toptopskat > 0 && (
-                    <span className={styles.tooltipRow}>
-                      <span>Toptopskat</span>
-                      <span>{formatDKK(result.taxBreakdown.toptopskat / 12)}</span>
-                    </span>
-                  )}
-                  <span className={`${styles.tooltipRow} ${styles.tooltipTotal}`}>
-                    <span>Total skat</span>
-                    <span>{formatDKK(result.taxBreakdown.total / 12)}</span>
-                  </span>
-                </span>
-              </span>
+              {summaryMode === 'gross' ? 'Årligt total' : 'Årligt netto'}
             </div>
-            <div className={styles.headerValueSubRow}>
-              <div className={styles.headerValueSub}>
-                {Math.round(result.estimatedMonthlyTakeHome).toLocaleString('da-DK')}
-                <span className={styles.headerUnitSub}>kr/md.</span>
-              </div>
-              {pctDiff(result.estimatedMonthlyTakeHome, compareResult?.estimatedMonthlyTakeHome ?? 0)}
+            <div className={styles.headerValueSub}>
+              {summaryMode === 'gross'
+                ? Math.round(result.totalAnnualComp).toLocaleString('da-DK')
+                : Math.round(result.netMonthlyAfterExpenses * 12).toLocaleString('da-DK')}
+              <span className={styles.headerUnitSub}>kr/år</span>
             </div>
           </div>
         </div>

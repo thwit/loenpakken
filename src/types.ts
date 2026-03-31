@@ -2,6 +2,7 @@ export interface CustomBenefit {
   id: string;
   label: string;
   valuePerMonth: number;
+  postTax: boolean; // false = taxable pre-tax benefit; true = deducted from net pay
 }
 
 export interface Package {
@@ -48,6 +49,10 @@ export interface CalculationResult {
   effectiveHourlyRateIncCommute: number;
   estimatedMonthlyTakeHome: number;
   annualTakeHome: number;
+  netMonthlyAfterExpenses: number;
+  netContractualHourlyRate: number;
+  netEffectiveHourlyRateExCommute: number;
+  netEffectiveHourlyRateIncCommute: number;
   taxBreakdown: TaxBreakdown;
   breakdown: BreakdownItem[];
   baseHourlyRate: number;

@@ -18,7 +18,7 @@ function encodePackage(pkg: Package, defaultName: string, params: URLSearchParam
   if (pkg.remoteDaysPerWeek !== 0)   params.set(`${p}.rd`, String(pkg.remoteDaysPerWeek));
   if (pkg.extraVacationDays !== 0)   params.set(`${p}.ev`, String(pkg.extraVacationDays));
   if (pkg.benefits.length > 0) {
-    params.set(`${p}.b`, pkg.benefits.map(b => `${encodeURIComponent(b.label)}:${b.valuePerMonth}`).join('|'));
+    params.set(`${p}.b`, pkg.benefits.map(b => `${encodeURIComponent(b.label)}:${b.valuePerMonth}${b.postTax ? 'p' : ''}`).join('|'));
   }
 }
 
@@ -35,10 +35,13 @@ function decodePackage(params: URLSearchParams, p: string, defaultName: string):
   const benefits: CustomBenefit[] = benefitsRaw
     ? benefitsRaw.split('|').map(part => {
         const cut = part.lastIndexOf(':');
+        const raw = part.slice(cut + 1);
+        const postTax = raw.endsWith('p');
         return {
           id: crypto.randomUUID(),
           label: decodeURIComponent(part.slice(0, cut)),
-          valuePerMonth: parseFloat(part.slice(cut + 1)) || 0,
+          valuePerMonth: parseFloat(postTax ? raw.slice(0, -1) : raw) || 0,
+          postTax,
         };
       })
     : [];

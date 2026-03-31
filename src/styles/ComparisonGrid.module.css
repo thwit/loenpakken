@@ -261,6 +261,39 @@
   width: 9.5rem;
 }
 
+.benefitTaxToggle {
+  display: flex;
+  flex-shrink: 0;
+  border: 1px solid var(--border-light);
+  border-radius: 3px;
+  overflow: hidden;
+  opacity: 0.7;
+}
+
+.benefitTaxBtn {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.55rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.2rem 0.4rem;
+  border: none;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+
+.benefitTaxBtn:hover { color: var(--text-2); }
+
+.benefitTaxBtnActive {
+  background: var(--text-3);
+  color: var(--surface);
+}
+
+.benefitTaxBtnActive:hover { background: var(--text-3); color: var(--surface); }
+
 .removeBenefitButton {
   flex-shrink: 0;
   background: none;
