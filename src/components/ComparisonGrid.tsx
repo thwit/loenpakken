@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef } from 'react';
 import type { Dispatch } from 'react';
 import type { Package } from '../types';
 import styles from '../styles/ComparisonGrid.module.css';
@@ -29,20 +29,43 @@ interface FieldProps {
 }
 
 function Field({ label, value, onChange, suffix, placeholder = '0', min, max, step, tooltip, thousands }: FieldProps) {
-  const [focused, setFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleThousandsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const el = e.target;
+    const cursorPos = el.selectionStart ?? 0;
+    const raw = el.value.replace(/\./g, '');
+    const num = parseInt(raw, 10) || 0;
+    onChange(num);
+
+    const newFormatted = num === 0 ? '' : num.toLocaleString('da-DK');
+    const digitsBeforeCursor = el.value.slice(0, cursorPos).replace(/\./g, '').length;
+
+    let digitCount = 0;
+    let newCursor = newFormatted.length;
+    if (digitsBeforeCursor === 0) {
+      newCursor = 0;
+    } else {
+      for (let i = 0; i < newFormatted.length; i++) {
+        if (newFormatted[i] !== '.') digitCount++;
+        if (digitCount === digitsBeforeCursor) { newCursor = i + 1; break; }
+      }
+    }
+
+    requestAnimationFrame(() => {
+      inputRef.current?.setSelectionRange(newCursor, newCursor);
+    });
+  };
 
   const inputEl = thousands ? (
     <input
+      ref={inputRef}
       type="text"
       inputMode="numeric"
       className={styles.input}
-      value={focused
-        ? (value === 0 ? '' : String(value))
-        : (value === 0 ? '' : value.toLocaleString('da-DK'))}
+      value={value === 0 ? '' : value.toLocaleString('da-DK')}
       placeholder={placeholder}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
-      onChange={e => onChange(parseFloat(e.target.value.replace(/\./g, '').replace(',', '.')) || 0)}
+      onChange={handleThousandsChange}
     />
   ) : (
     <input
