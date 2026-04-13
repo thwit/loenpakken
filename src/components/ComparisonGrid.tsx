@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Dispatch } from 'react';
 import type { Package } from '../types';
 import styles from '../styles/ComparisonGrid.module.css';
@@ -24,10 +25,26 @@ interface FieldProps {
   max?: number;
   step?: number | 'any';
   tooltip?: string;
+  thousands?: boolean;
 }
 
-function Field({ label, value, onChange, suffix, placeholder = '0', min, max, step, tooltip }: FieldProps) {
-  const inputEl = (
+function Field({ label, value, onChange, suffix, placeholder = '0', min, max, step, tooltip, thousands }: FieldProps) {
+  const [focused, setFocused] = useState(false);
+
+  const inputEl = thousands ? (
+    <input
+      type="text"
+      inputMode="numeric"
+      className={styles.input}
+      value={focused
+        ? (value === 0 ? '' : String(value))
+        : (value === 0 ? '' : value.toLocaleString('da-DK'))}
+      placeholder={placeholder}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      onChange={e => onChange(parseFloat(e.target.value.replace(/\./g, '').replace(',', '.')) || 0)}
+    />
+  ) : (
     <input
       type="number"
       className={styles.input}
@@ -91,11 +108,13 @@ function PackageColumn({ pkg, index, dispatch }: ColumnProps) {
           label="Månedlig grundløn (DKK)"
           value={pkg.monthlySalary}
           onChange={v => upd('monthlySalary', v)}
+          thousands
         />
         <Field
           label="Årlig bonus (DKK)"
           value={pkg.yearlyBonus}
           onChange={v => upd('yearlyBonus', v)}
+          thousands
         />
       </div>
 
