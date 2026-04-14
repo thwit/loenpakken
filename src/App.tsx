@@ -71,25 +71,17 @@ export default function App() {
 
   const [tab, setTab] = useState<Tab>('timesats');
   const [summaryMode, setSummaryMode] = useState<SummaryMode>('gross');
-  const [darkMode, setDarkMode] = useState(false);
 
   const rawResults = packages.map(pkg => calculate(pkg));
   const normalizedBreakdowns = normalizeBreakdowns(rawResults);
   const results = rawResults.map((r, i) => ({ ...r, breakdown: normalizedBreakdowns[i] }));
 
   return (
-    <div className={styles.app} data-theme={darkMode ? 'dark' : undefined}>
+    <div className={styles.app}>
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <span className={styles.logo}>Lønpakken</span>
           <div className={styles.headerActions}>
-            <button
-              className={styles.darkToggle}
-              onClick={() => setDarkMode(d => !d)}
-              aria-label="Skift farvetema"
-            >
-              {darkMode ? '☀' : '☽'}
-            </button>
             <ShareButton />
           </div>
         </div>
