@@ -166,3 +166,14 @@
   color: var(--brand);
   background: rgba(84,110,122,.06);
 }
+
+.disclaimer {
+  text-align: justify;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.62rem;
+  color: var(--text-3);
+  padding: 2rem 0 2.5rem;
+  width: 33%;
+  margin: 0 auto;
+  line-height: 1.6;
+}

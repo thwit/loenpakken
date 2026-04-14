@@ -120,6 +120,9 @@ export default function App() {
           </div>
         </section>
       </main>
+      <footer className={styles.disclaimer}>
+        Lønpakken er et vejledende beregningsværktøj og udgør ikke juridisk eller økonomisk rådgivning. Beregningerne er baseret på skøn og generelle skatteregler for Københavns Kommune (2026) og kan afvige fra din faktiske lønseddel. Vi påtager os intet ansvar for beslutninger truffet på baggrund af værktøjet.
+      </footer>
     </div>
   );
 }
