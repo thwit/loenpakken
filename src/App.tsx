@@ -113,7 +113,8 @@ export default function App() {
         </section>
       </main>
       <footer className={styles.disclaimer}>
-        Lønpakken er et vejledende beregningsværktøj og udgør ikke juridisk eller økonomisk rådgivning. Beregningerne er baseret på skøn og generelle skatteregler for Københavns Kommune (2026) og kan afvige fra din faktiske lønseddel. Vi påtager os intet ansvar for beslutninger truffet på baggrund af værktøjet.
+        Lønpakken er et vejledende værktøj - tallene er estimater og kan afvige fra virkeligheden.
+        {' '}Udviklet af <a href="https://www.linkedin.com/in/thomas-witting/" target="_blank" rel="noopener noreferrer" className={styles.disclaimerLink}>Thomas Witting</a>
       </footer>
     </div>
   );

@@ -161,3 +161,13 @@
   margin: 0 auto;
   line-height: 1.6;
 }
+
+.disclaimerLink {
+  color: color-mix(in srgb, var(--text-3) 80%, var(--text-2) 20%);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.disclaimerLink:hover {
+  color: var(--text-2);
+}
