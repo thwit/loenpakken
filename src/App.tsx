@@ -80,7 +80,7 @@ export default function App() {
     <div className={styles.app}>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <span className={styles.logo}>Lønpakken</span>
+          <a href="/" className={styles.logo}>Lønpakken</a>
           <div className={styles.headerActions}>
             <ShareButton />
           </div>
