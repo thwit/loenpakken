@@ -16,6 +16,7 @@ export function ShareButton() {
       document.execCommand('copy');
       document.body.removeChild(ta);
     }
+    (window as any).umami?.track('share');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
