@@ -88,7 +88,7 @@ export default function App() {
       </header>
       <div className={styles.bmcBanner}>
         <span>Var værktøjet en hjælp?</span>
-        <a href="https://buymeacoffee.com/thwit" target="_blank" rel="noopener noreferrer" className={styles.bmcLink}>
+        <a href="https://buymeacoffee.com/thwit" target="_blank" rel="noopener noreferrer" className={styles.bmcLink} onClick={() => (window as any).umami?.track('buymeacoffee')}>
           ☕ Støt med en kop kaffe
         </a>
       </div>
