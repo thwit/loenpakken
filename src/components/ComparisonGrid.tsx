@@ -220,6 +220,12 @@ function PackageColumn({ pkg, index, dispatch }: ColumnProps) {
           value={pkg.monthlyCommuteCost}
           onChange={v => upd('monthlyCommuteCost', v)}
         />
+        <Field
+          label="Kørselsfradrag (år.)"
+          value={pkg.yearlyKørselsfradrag}
+          onChange={v => upd('yearlyKørselsfradrag', v)}
+          tooltip="Dit årlige kørselsfradrag - beregn det på skat.dk. Fradraget reducerer din skattepligtige indkomst."
+        />
       </div>
 
       <Field

@@ -15,6 +15,7 @@ function encodePackage(pkg: Package, defaultName: string, params: URLSearchParam
   if (pkg.betaltFrokost)             params.set(`${p}.bf`, '1');
   if (pkg.commuteMinutesPerDay !== 0) params.set(`${p}.cm`, String(pkg.commuteMinutesPerDay));
   if (pkg.monthlyCommuteCost !== 0)  params.set(`${p}.mc`, String(pkg.monthlyCommuteCost));
+  if (pkg.yearlyKørselsfradrag !== 0) params.set(`${p}.kf`, String(pkg.yearlyKørselsfradrag));
   if (pkg.remoteDaysPerWeek !== 0)   params.set(`${p}.rd`, String(pkg.remoteDaysPerWeek));
   if (pkg.extraVacationDays !== 0)   params.set(`${p}.ev`, String(pkg.extraVacationDays));
   if (pkg.benefits.length > 0) {
@@ -61,6 +62,7 @@ function decodePackage(params: URLSearchParams, p: string, defaultName: string):
     betaltFrokost: params.get(`${p}.bf`) === '1',
     commuteMinutesPerDay: num(`${p}.cm`),
     monthlyCommuteCost: num(`${p}.mc`),
+    yearlyKørselsfradrag: num(`${p}.kf`),
     remoteDaysPerWeek: num(`${p}.rd`),
     extraVacationDays: num(`${p}.ev`),
     benefits,

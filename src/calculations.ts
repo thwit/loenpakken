@@ -98,9 +98,9 @@ export function calculate(pkg: Package): CalculationResult {
   const annualOwnPension = monthlyOwnPension * 12;
   const taxableAnnual = annualSalary - annualOwnPension + ferietillaeg + fritvalgAnnual + pkg.yearlyBonus + preTaxBenefitsAnnual;
   const taxBreakdown = calculateDanishTax(Math.max(taxableAnnual, 0));
-  const effectiveTaxRate = taxableAnnual > 0 ? taxBreakdown.total / taxableAnnual : 0;
-  const roundedTaxRate = Math.ceil(effectiveTaxRate * 100) / 100;
-  const annualTakeHome = Math.max(taxableAnnual * (1 - roundedTaxRate) + postTaxAdjustmentAnnual - annualCommuteCost, 0);
+  // Kørselsfradrag is a ligningsmæssigt fradrag — it only reduces kommuneskat, not bundskat
+  const kørselsfradragSaving = pkg.yearlyKørselsfradrag * KOMMUNESKAT_RATE;
+  const annualTakeHome = Math.max(taxableAnnual - taxBreakdown.total + kørselsfradragSaving + postTaxAdjustmentAnnual - annualCommuteCost, 0);
   const estimatedMonthlyTakeHome = annualTakeHome / 12;
 
   // All items always included in fixed order — normalization happens in normalizeBreakdowns()

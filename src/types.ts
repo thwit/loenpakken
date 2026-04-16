@@ -20,6 +20,7 @@ export interface Package {
   betaltFrokost: boolean;
   commuteMinutesPerDay: number;
   monthlyCommuteCost: number;
+  yearlyKørselsfradrag: number;
   remoteDaysPerWeek: number;
   // Goder
   extraVacationDays: number;

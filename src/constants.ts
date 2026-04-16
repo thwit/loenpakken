@@ -19,6 +19,7 @@ export function createDefaultPackage(name: string): Package {
     betaltFrokost: false,
     commuteMinutesPerDay: 0,
     monthlyCommuteCost: 0,
+    yearlyKørselsfradrag: 0,
     remoteDaysPerWeek: 0,
     extraVacationDays: 0,
     benefits: [],
