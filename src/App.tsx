@@ -69,10 +69,6 @@ export default function App() {
     encodeState(packages);
   }, [packages]);
 
-  useEffect(() => {
-    (window as any).umami?.track({ url: '/', title: 'Lønpakken' });
-  }, []);
-
   const [tab, setTab] = useState<Tab>('timesats');
   const [summaryMode, setSummaryMode] = useState<SummaryMode>('gross');
 
